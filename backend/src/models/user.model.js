@@ -9,6 +9,8 @@ const userSchema =  new Schema({
         unique:true,
         trim:true,
         lowercase:true,
+        minlength:3,
+        match: [/^[a-z0-9_]+$/, "Invalid username"]
     },
     email:{
         type:String,
@@ -16,18 +18,25 @@ const userSchema =  new Schema({
         trim:true,
         unique:true,
         lowercase:true,
+        match:[/^\S+@\S+\.\S+$/, "Invalid email"]
+    },
+    isVerified:{
+      type:Boolean,
+      default:true,
     },
     password:{
         type:String,
         required:[true, "Password is needed"],
         minlength:8,
+        select:false,
     },
     bio:{
         type:String,
         default:""
     },
     profilePicture:{
-        type:String, //cloudinary url
+        type:String,
+        default:"" //cloudinary url
     },
     reputation:{
         type:Number,
@@ -43,6 +52,7 @@ const userSchema =  new Schema({
     },
     refreshToken:{
         type:String,
+        select:false
     },
 
 },{timestamps:true})
@@ -63,7 +73,8 @@ userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      username:this.username
+      username:this.username,
+      email:this.email
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
@@ -75,8 +86,7 @@ userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      
-
+    
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
