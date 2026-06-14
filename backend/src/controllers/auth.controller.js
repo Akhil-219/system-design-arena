@@ -72,3 +72,5 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "logged out successfully "));
 })
+
+export {loginUserController, logoutUserController, refreshAccessTokenController, registerUserController}
