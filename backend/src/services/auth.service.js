@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import {ApiError} from "../utiles/ApiError.js"
+import {ApiError} from "../utils/ApiError.js"
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {

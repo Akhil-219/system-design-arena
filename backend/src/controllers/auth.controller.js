@@ -7,7 +7,7 @@ const registerUserController=asyncHandler(async(req,res)=>{
     const {user, accessToken, refreshToken}=await registerUser({username,email,password})
     const options={
         httpOnly:true,
-        secure:true,
+        secure: process.env.NODE_ENV === "production",
     }
     return res
     .status(201)
@@ -15,7 +15,7 @@ const registerUserController=asyncHandler(async(req,res)=>{
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(
         201,
-        { user, accessToken, refreshToken }, 
+        { user }, // make sure to remove the tokens this after the frontend development 
         "User registered successfully" 
     ))
 })
@@ -25,7 +25,7 @@ const loginUserController=asyncHandler(async (req, res)=>{
     const {user, accessToken, refreshToken}= await loginUser({login,password})
     const options={
         httpOnly:true,
-        secure:true,
+        secure: process.env.NODE_ENV === "production",
     }
     return res
     .status(200)
@@ -33,7 +33,7 @@ const loginUserController=asyncHandler(async (req, res)=>{
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(
         200,
-        { user, accessToken, refreshToken }, 
+        { user }, // make sure to remove this after the frontend development 
         "User loggedIn successfully" 
     ))
 })
@@ -43,7 +43,7 @@ const refreshAccessTokenController =asyncHandler(async(req, res)=>{
     const {accessToken, refreshToken}=await refreshAccessToken(incomingRefreshToken)
     const options={
         httpOnly:true,
-        secure:true,
+        secure: process.env.NODE_ENV === "production",
     }
     return res
     .status(200)
@@ -51,7 +51,7 @@ const refreshAccessTokenController =asyncHandler(async(req, res)=>{
     .cookie("refreshToken", refreshToken, options)
     .json(new ApiResponse(
         200,
-        { accessToken, refreshToken }, 
+        { }, // remove this also (*dont forget*)
         "accessToken refreshed successfully" 
     ))  
 })
@@ -64,7 +64,7 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     }
     const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
   };
   return res
     .status(200)
