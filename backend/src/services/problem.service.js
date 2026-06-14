@@ -22,6 +22,8 @@ const getProblems = async (params) => {
   }
   const page = Number(params.page) || 1;
   const limit = Math.min(Number(params.limit) || 10, 50);
+
+
   const [problems, total] = await Promise.all([
     Problem.find(query)
       .skip((page - 1) * limit)
@@ -29,6 +31,7 @@ const getProblems = async (params) => {
       .sort({ title: 1 }),
     Problem.countDocuments(query),
   ]);
+
   const totalPages = Math.ceil(total / limit);
   return {
     problems,
@@ -43,7 +46,7 @@ const getProblems = async (params) => {
   };
 };
 
-const getProblemsBySlug = async (params) => {
+const getProblemBySlug = async (params) => {
   // same we will get the param then we have to find the problem based on that param
   const { slug } = params;
   if (!slug) {
@@ -52,7 +55,7 @@ const getProblemsBySlug = async (params) => {
   const requestedSlug = slug.toLowerCase();
 
   const problem = await Problem.findOne({ slug: requestedSlug });
-  if (!problems) {
+  if (!problem) {
     throw new ApiError(404, "Problem not found");
   }
   return {
@@ -60,4 +63,4 @@ const getProblemsBySlug = async (params) => {
   };
 };
 
-export { getProblems, getProblemsBySlug };
+export { getProblems, getProblemBySlug };

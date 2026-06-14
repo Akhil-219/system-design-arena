@@ -34,6 +34,7 @@ const problemSchema = new Schema(
       {
         type: String,
         required: true,
+        lowercase:true
       },
     ],
     referenceComponents: [
