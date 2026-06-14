@@ -55,7 +55,6 @@ problemSchema.index({
     title: "text",
     description: "text"
 });
-problemSchema.index({ slug: 1 });
 problemSchema.index({ difficulty: 1 });
 problemSchema.index({ tags: 1 });
 

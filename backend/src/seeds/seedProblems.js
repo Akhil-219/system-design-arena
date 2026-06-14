@@ -13,6 +13,8 @@ const seedProblems = async () => {
     (await connectDB(), await Problem.deleteMany({}));
     await Problem.insertMany(problems);
     console.log("Seeding successful");
+    console.log(problems.length);
+    
     await mongoose.connection.close();
     process.exit(0);
   } catch (error) {
