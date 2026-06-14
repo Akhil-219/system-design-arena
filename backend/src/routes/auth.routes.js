@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import { Router } from "express";
 import {
   loginUserController,
   logoutUserController,
@@ -11,7 +11,7 @@ const router = Router();
 
 router.route("/register").post(registerUserController);
 router.route("/login").post(loginUserController);
-router.route("/refresh-Token").post(refreshAccessTokenController);
+router.route("/refresh-token").post(refreshAccessTokenController);
 router.route("/logout").post(verifyJWT, logoutUserController);
 
 export default router;
