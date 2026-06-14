@@ -6,11 +6,13 @@ const problemSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      trim: true
     },
     slug: {
       type: String,
       required: true,
       unique: true,
+      trim: true
     },
     description: {
       type: String,
@@ -42,11 +44,19 @@ const problemSchema = new Schema(
     ],
     difficulty: {
       type: String,
-      enum:["Easy","Medium","Hard"],
+      enum:["easy","medium","hard"],
       required: true,
     },
   },
   { timestamps: true },
 );
+
+problemSchema.index({
+    title: "text",
+    description: "text"
+});
+problemSchema.index({ slug: 1 });
+problemSchema.index({ difficulty: 1 });
+problemSchema.index({ tags: 1 });
 
 export const Problem = mongoose.model("Problem", problemSchema);
