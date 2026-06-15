@@ -6,6 +6,11 @@ const versionSchema= new Schema({
         ref:"Design",
         required:true,
     },
+    problemId:{
+        type:Schema.Types.ObjectId,
+        ref:"Problem",
+        required:true,
+    },
     versionNumber:{
         type:Number,
         default:1,

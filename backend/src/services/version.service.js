@@ -32,6 +32,7 @@ const createSnapshot = async ({ designId, userId }) => {
   }
   const version = await Version.create({
     designId,
+    problemId: design.problemId,
     versionNumber: nextVersionNumber,
     diagramData: design.draftDiagramData,
     notes: design.draftNotes,

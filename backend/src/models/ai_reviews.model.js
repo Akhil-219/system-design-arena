@@ -1,41 +1,209 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const ai_reviewSchema = new Schema(
+const aiReviewSchema = new Schema(
   {
-    versionId:{
-        type:Schema.Types.ObjectId,
-        ref:"Version",
-        unique:true,
-        required:true
+    versionId: {
+      type: Schema.Types.ObjectId,
+      ref: "Version",
+      required: true,
+      unique: true,
     },
-    overallScore: {
+
+    score: {
       type: Number,
-      default: 0,
+      required: true,
+      min: 0,
+      max: 100,
     },
-    strengths: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-    weaknesses: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-    suggestions: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-    reviewText: {
+
+    verdict: {
+      type: String,
+      enum: ["pass", "borderline", "fail"],
+      required: true,
+    },
+
+    interviewRating: {
+      type: String,
+      enum: [
+        "strong hire",
+        "hire",
+        "borderline",
+        "no hire",
+      ],
+      required: true,
+    },
+
+    summary: {
       type: String,
       required: true,
     },
+
+    scaleAssessment: {
+      type: String,
+      required: true,
+    },
+
+    requirementCoverage: {
+      covered: [
+        {
+          type: String,
+        },
+      ],
+
+      missing: [
+        {
+          type: String,
+        },
+      ],
+
+      partial: [
+        {
+          type: String,
+        },
+      ],
+    },
+
+    strengths: [
+      {
+        point: {
+          type: String,
+          required: true,
+        },
+
+        detail: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    weaknesses: [
+      {
+        point: {
+          type: String,
+          required: true,
+        },
+
+        detail: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    missedConcepts: [
+      {
+        concept: {
+          type: String,
+          required: true,
+        },
+
+        why: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    componentFeedback: [
+      {
+        component: {
+          type: String,
+          required: true,
+        },
+
+        assessment: {
+          type: String,
+          enum: [
+            "good",
+            "acceptable",
+            "flawed",
+            "missing",
+          ],
+          required: true,
+        },
+
+        feedback: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    improvements: [
+      {
+        priority: {
+          type: String,
+          enum: [
+            "critical",
+            "high",
+            "medium",
+            "low",
+          ],
+          required: true,
+        },
+
+        area: {
+          type: String,
+          required: true,
+        },
+
+        suggestion: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+
+    conceptualDepth: {
+      type: String,
+      enum: [
+        "surface",
+        "adequate",
+        "deep",
+        "exceptional",
+      ],
+      required: true,
+    },
+
+    tradeoffAwareness: {
+      type: String,
+      enum: [
+        "none",
+        "minimal",
+        "moderate",
+        "strong",
+      ],
+      required: true,
+    },
+
+    productionReadiness: {
+      type: String,
+      enum: [
+        "not addressed",
+        "partially addressed",
+        "well addressed",
+      ],
+      required: true,
+    },
+
+    followUpQuestions: [
+      {
+        type: String,
+      },
+    ],
+
+    reviewPromptVersion: {
+      type: Number,
+      default: 1,
+    },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
 
-export const Ai_review = mongoose.model("Ai_review", ai_reviewSchema);
+export const AiReview = mongoose.model(
+  "AiReview",
+  aiReviewSchema
+);
