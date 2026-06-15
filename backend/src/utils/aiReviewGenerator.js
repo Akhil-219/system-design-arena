@@ -1,4 +1,4 @@
-import { openRouterClient } from "./openRouter.js";
+import { openRouterClient } from "../ai/openRouter.js";
 
 export const generateAiReview = async (prompt) => {
   const response =
@@ -15,6 +15,8 @@ export const generateAiReview = async (prompt) => {
       response_format: {
         type: "json_object",
       },
+      max_tokens: 500,
+    temperature: 0.3,
     });
 
   const content =

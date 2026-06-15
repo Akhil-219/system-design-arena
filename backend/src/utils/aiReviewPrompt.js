@@ -243,6 +243,7 @@ Return exactly this shape:
   "productionReadiness": "<not addressed|partially addressed|well addressed>",
   "followUpQuestions": []
 }`;
+return prompt
 }
 
 export default buildReviewPromptV1
