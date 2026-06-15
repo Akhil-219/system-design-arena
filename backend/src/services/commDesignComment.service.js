@@ -2,7 +2,7 @@ import { Design } from "../models/design.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { DesignComment } from "../models/design_comments.model.js";
-const addCommentInCommunity = async ({ designId, comment, userId }) => {
+const createCommentInCommunity = async ({ designId, comment, userId }) => {
   const design = await Design.findById(designId);
   const user = await User.findById(userId);
   if (!user) {
@@ -14,7 +14,7 @@ const addCommentInCommunity = async ({ designId, comment, userId }) => {
   if (!design.isPosted) {
     throw new ApiError(400, "Cannot comment on unpublished design");
   }
-  const comment = await DesignComment.create({
+  const createdComment = await DesignComment.create({
     designId: designId,
     authorId: userId,
     content: comment,
@@ -22,7 +22,7 @@ const addCommentInCommunity = async ({ designId, comment, userId }) => {
   const prevCount=desgin.commentCount
   designId.commentCount=prevCount+1;
   await design.save({validateBeforeSave:false})
-  return { comment };
+  return { createdComment };
 };
 
 const getCommentsOfDesign =async({designId})=>{
@@ -39,14 +39,18 @@ const getCommentsOfDesign =async({designId})=>{
 
 const deleteComment= async({commentId,userId})=>{
     const comment= await DesignComment.findById(commentId)
+    
     if(!comment){
         throw new ApiError(404,"Comment was already deleted")
     }
     if(comment.authorId.toString() !== userId.toString()){
         throw new ApiError(403,"Cant delete another person's comment")
     }
+    const design =await Design.findById(comment.designId)
+    const prevCount=design.commentCount;
+    design.commentCount=prevCount-1;
     await DesignComment.delete({_id:commentId})
     return true
 }
 
-export { addCommentInCommunity , deleteComment, getCommentsOfDesign};
+export { createCommentInCommunity , deleteComment, getCommentsOfDesign};
