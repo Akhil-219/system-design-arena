@@ -9,7 +9,6 @@ const designSchema = new Schema(
     currentVersion: {
       type: Schema.Types.ObjectId,
       ref: "Version",
-      required:true
     },
     postedVersion: {
       type: Schema.Types.ObjectId,// may or may not post so , its not required
