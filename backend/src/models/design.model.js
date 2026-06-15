@@ -18,7 +18,7 @@ const designSchema = new Schema(
     ],
     draftDiagramData: {
       type: Object,
-      required: true,
+      default: {}
     },
     draftNotes: {
       type: String,

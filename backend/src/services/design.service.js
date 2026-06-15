@@ -4,9 +4,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { Problem } from "../models/problems.model.js";
 import { createSnapshot } from "./version.service.js";
 
-const createDesign = async ({ problemId, userId,diagramData, notes}) => {
+const createDesign = async ({ problemId, userId, diagramData, notes }) => {
   const problem = await Problem.findById(problemId);
-
+  const draftDiagramData = diagramData;
+  const draftNotes = notes;
   if (!problem) {
     throw new ApiError(404, "Problem not found");
   }
@@ -20,16 +21,15 @@ const createDesign = async ({ problemId, userId,diagramData, notes}) => {
   const design = await Design.create({
     title: "Untitled Design",
     ownerId: userId,
+    draftDiagramData: draftDiagramData,
+    draftNotes: draftNotes,
     problemId,
     currentVersion: null,
   });
-  const draftDiagramData = diagramData;
-  const draftNotes = notes;
-  design.draftDiagramData=draftDiagramData;
-  design.draftNotes=draftNotes;
   design.currentVersion = null;
   design.postedVersion = null;
-  await createSnapshot({problemId, designId,userId,diagramData, notes})
+  await design.save();
+  // await createSnapshot({ designId,userId})
   return { design };
 };
 
@@ -37,6 +37,7 @@ const getDesignById = async ({ designId, userId }) => {
   //check for designid, if not sound return 404,
   // check for the user of that desing id,
   // get the current version return it
+  
   const design = await Design.findById(designId).populate("currentVersion");
   if (!design) {
     throw new ApiError(404, "Design not found");
@@ -67,22 +68,13 @@ const updateDesign = async ({ designId, userId, diagramData, notes }) => {
   if (design.ownerId.toString() !== userId.toString()) {
     throw new ApiError(403, "Access denied");
   }
-  const updateFields = {};
 
-  if (diagramData !== undefined) {
-    updateFields.diagramData = diagramData;
-  }
-
-  if (notes !== undefined) {
-    updateFields.notes = notes;
-  }
   const draftDiagramData = diagramData;
   const draftNotes = notes;
-  design.draftDiagramData=draftDiagramData;
-  design.draftNotes=draftNotes;
-  const version=await createSnapshot({problemId, designId,userId,diagramData, notes})
-
-  return { design, version };
+  design.draftDiagramData = draftDiagramData;
+  design.draftNotes = draftNotes;
+  await design.save();
+  return { design };
 };
 
 const deleteDesign = async ({ designId, userId }) => {

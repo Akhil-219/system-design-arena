@@ -32,5 +32,9 @@ const versionSchema= new Schema({
         default: "MANUAL"
     }
 },{timestamps:true})
+versionSchema.index(
+  { designId: 1, versionNumber: 1 },
+  { unique: true }
+);
 
 export const Version= mongoose.model("Version",versionSchema)
