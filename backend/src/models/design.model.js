@@ -10,15 +10,14 @@ const designSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Version",
     },
-    postedVersion: [
-      {
-        type: Schema.Types.ObjectId, // may or may not post so , its not required
-        ref: "Version",
-      },
-    ],
+    postedVersion: {
+      type: Schema.Types.ObjectId, // may or may not post so , its not required
+      ref: "Version",
+      default:null
+    },
     draftDiagramData: {
       type: Object,
-      default: {}
+      default: {},
     },
     draftNotes: {
       type: String,
@@ -26,7 +25,7 @@ const designSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["ATTEMPTING", "DESIGNED"],
+      enum: ["ATTEMPTING", "DESIGNED", "PUBLISHED"],
       default: "ATTEMPTING",
     },
     isPosted: {
