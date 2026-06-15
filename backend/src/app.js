@@ -4,6 +4,7 @@ import cors from "cors"
 import authRouter from "../src/routes/auth.routes.js"
 import problemsRouter from "../src/routes/problem.routes.js"
 import designRouter from "../src/routes/design.routes.js"
+import communityDesignRouter from "../src/routes/communityDesign.routes.js"
 const app =express()
 
 app.use(cors({
@@ -20,5 +21,6 @@ app.use(cookieParser())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/problems", problemsRouter)
 app.use("/api/v1/designs", designRouter)
+app.use("/api/v1/community",communityDesignRouter)
 
 export {app}
