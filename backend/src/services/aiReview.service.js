@@ -4,7 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { Design } from "../models/design.model.js";
 import { Problem } from "../models/problems.model.js";
 import buildReviewPromptV1 from "../utils/aiReviewPrompt.js";
-import { generateAiReview } from "../utils/generateAiReview.js";
+import { generateAiReview } from "../utils/aiReviewGenerator.js";
 
 const generateReview = async ({ versionId, userId }) => {
   const version = await Version.findById(versionId);
@@ -22,7 +22,7 @@ const generateReview = async ({ versionId, userId }) => {
 
   const problem = await Problem.findById(version.problemId);
   // ai call on the version and populate the reivew
-    const prompt = "Return JSON: {\"message\":\"hello\"}";// to be changed
+  const prompt =buildReviewPromptV1({problem, version})
   const aiResponse = await generateAiReview(prompt);
   console.log(aiResponse);
   
@@ -63,17 +63,19 @@ const generateReview = async ({ versionId, userId }) => {
 
 
 const getReviewById=async({versionId, userId})=>{
-    const version=Version.findById(versionId)
+    const version=await Version.findById(versionId)
     if(!version){
         throw new ApiError(404,"Version not found")
     }
     if(version.createdBy.toString() !== userId.toString()){
         throw new ApiError(403,"Unauthorised Access")
     }
-    const review=AiReview.findById(version._id)
+    const review=await AiReview.findOne({versionId:version._id})
     if(!review){
         throw new ApiError(404, "Review not found, try to create one review")
     }
+  
+  
     return {review}
 }
 
