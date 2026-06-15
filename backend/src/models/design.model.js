@@ -10,10 +10,19 @@ const designSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Version",
     },
-    postedVersion: {
-      type: Schema.Types.ObjectId,// may or may not post so , its not required
-      ref: "Version",
-
+    postedVersion: [
+      {
+        type: Schema.Types.ObjectId, // may or may not post so , its not required
+        ref: "Version",
+      },
+    ],
+    draftDiagramData: {
+      type: Object,
+      required: true,
+    },
+    draftNotes: {
+      type: String,
+      default: "",
     },
     status: {
       type: String,
@@ -35,12 +44,12 @@ const designSchema = new Schema(
     problemId: {
       type: Schema.Types.ObjectId,
       ref: "Problem",
-      required:true
+      required: true,
     },
     ownerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required:true
+      required: true,
     },
   },
   { timestamps: true },

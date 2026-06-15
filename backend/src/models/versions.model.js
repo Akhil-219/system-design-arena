@@ -18,6 +18,19 @@ const versionSchema= new Schema({
         type:String,
         default:"",
     },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
+    snapshotType: {
+        type: String,
+        enum: [
+            "MANUAL",
+            "AI_REVIEW",
+            "PUBLISH"
+        ],
+        default: "MANUAL"
+    }
 },{timestamps:true})
 
 export const Version= mongoose.model("Version",versionSchema)

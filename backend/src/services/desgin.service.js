@@ -2,8 +2,9 @@ import { Design } from "../models/design.model.js";
 import { Version } from "../models/versions.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Problem } from "../models/problems.model.js";
+import { createSnapshot } from "./version.service.js";
 
-const createDesign = async ({ problemId, userId }) => {
+const createDesign = async ({ problemId, userId,diagramData, notes}) => {
   const problem = await Problem.findById(problemId);
 
   if (!problem) {
@@ -20,22 +21,15 @@ const createDesign = async ({ problemId, userId }) => {
     title: "Untitled Design",
     ownerId: userId,
     problemId,
-
     currentVersion: null,
   });
-  const version = await Version.create({
-    designId: design._id,
-    versionNumber: 1,
-
-    diagramData: {
-      nodes: [],
-      edges: [],
-    },
-
-    notes: "",
-  });
-  design.currentVersion = version._id;
-  await design.save();
+  const draftDiagramData = diagramData;
+  const draftNotes = notes;
+  design.draftDiagramData=draftDiagramData;
+  design.draftNotes=draftNotes;
+  design.currentVersion = null;
+  design.postedVersion = null;
+  await createSnapshot({problemId, designId,userId,diagramData, notes})
   return { design };
 };
 
@@ -66,6 +60,7 @@ const getMyDesigns = async ({ userId }) => {
 
 const updateDesign = async ({ designId, userId, diagramData, notes }) => {
   const design = await Design.findById(designId);
+
   if (!design) {
     throw new ApiError(404, "Design not exists");
   }
@@ -81,14 +76,11 @@ const updateDesign = async ({ designId, userId, diagramData, notes }) => {
   if (notes !== undefined) {
     updateFields.notes = notes;
   }
-  const version = await Version.findByIdAndUpdate(
-    design.currentVersion,
-    updateFields,
-
-    {
-      new: true,
-    },
-  );
+  const draftDiagramData = diagramData;
+  const draftNotes = notes;
+  design.draftDiagramData=draftDiagramData;
+  design.draftNotes=draftNotes;
+  const version=await createSnapshot({problemId, designId,userId,diagramData, notes})
 
   return { design, version };
 };
@@ -106,4 +98,10 @@ const deleteDesign = async ({ designId, userId }) => {
   return true;
 };
 
-export {createDesign, getDesignById, getMyDesigns,updateDesign, deleteDesign}
+export {
+  createDesign,
+  getDesignById,
+  getMyDesigns,
+  updateDesign,
+  deleteDesign,
+};
