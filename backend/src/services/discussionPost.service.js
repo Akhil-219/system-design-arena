@@ -1,3 +1,4 @@
+import { DiscussionComment } from "../models/discussion_comments.model.js"
 import { DiscussionPost } from "../models/discussion_posts.model.js"
 import {Problem} from "../models/problems.model.js"
 import {ApiError} from "../utils/ApiError.js"
@@ -35,6 +36,7 @@ const deleteDiscussionPost=async({postId,userId})=>{
         throw new ApiError(403, "Cannot delete another user's post")
     }
     // delete many comments of the post , votes in future then
+    await DiscussionComment.deleteMany({postId:postId})
     await DiscussionPost.findByIdAndDelete(postId)
     return true
 }
