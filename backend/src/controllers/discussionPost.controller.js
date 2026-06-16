@@ -4,8 +4,8 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 const createPostInDiscussionController=asyncHandler(async(req,res)=>{
     const {content}=req.body
     const {problemId}=req.params
-    await createPostInDiscussion({problemId,content,userId:req.user._id})
-    return res.status(201).json(new ApiResponse(201,{content}, "Post posted successfully"))
+    const {post}=await createPostInDiscussion({problemId,content,userId:req.user._id})
+    return res.status(201).json(new ApiResponse(201,{post}, "Post posted successfully"))
 })
 
 const getAllDiscussionPostsController=asyncHandler(async(req,res)=>{

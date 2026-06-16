@@ -6,12 +6,15 @@ const createPostInDiscussion=async({problemId, content,userId})=>{
     if(!problem){
         throw new ApiError(404, "Problem not found")
     }
-    await DiscussionPost.create({
+    if(!content?.trim()){
+        throw new ApiError(400,"Content is required")
+    }
+    const post=await DiscussionPost.create({
         problemId:problemId,
         authorId:userId,
         content:content
     })
-    return true
+    return {post}
 }
 
 const getAllDiscussionPosts=async({problemId})=>{
@@ -19,29 +22,28 @@ const getAllDiscussionPosts=async({problemId})=>{
     if(!problem){
         throw new ApiError(404, "Problem not found")
     }
-    const allPosts=await DiscussionPost.find({problemId:problemId}).populate("authorId","username profilePicture").populate("content")
+    const allPosts=await DiscussionPost.find({problemId:problemId}).populate("authorId","username profilePicture").sort({ createdAt: -1 })
     return {allPosts}
 }
 
 const deleteDiscussionPost=async({postId,userId})=>{
-    const problem= await Problem.findById(problemId)
-    if(!problem){
-        throw new ApiError(404, "Problem not found")
-    }
-    const existingPost=DiscussionPost.findById(postId)
+    const existingPost=await DiscussionPost.findById(postId)
     if(!existingPost){
         throw new ApiError(404,"Post not found")
     }
     if(existingPost.authorId.toString() !== userId.toString()){
-        throw new ApiError(403, "Cant delete another person comment")
+        throw new ApiError(403, "Cannot delete another user's post")
     }
     // delete many comments of the post , votes in future then
     await DiscussionPost.findByIdAndDelete(postId)
     return true
 }
 
-const getDiscussionPostById=async(postId)=>{
-    const post=await DiscussionPost.findById(postId).populate("authorId","username profilePicture").populate("content")
+const getDiscussionPostById=async({postId})=>{
+    const post=await DiscussionPost.findById(postId).populate("authorId","username profilePicture")
+    if(!post){
+      throw new ApiError(404,"Post not found")
+    }
     return {post}
 }
 
