@@ -33,7 +33,7 @@ const getPublishedDesignsByUser = async({username})=>{
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  const publishedDesigns =await Design.find({ isPosted: true, ownerId: user._id }).populate(problemId,
+  const {publishedDesigns} =await Design.find({ isPosted: true, ownerId: user._id }).populate(problemId,
 postedVersion);
   return {publishedDesigns}
 }
@@ -61,7 +61,7 @@ const getUser=async({userId})=>{
       },
     },
   ]);
-  return {user, publishedDesigns , publishedDesignsCount, totalUpvotes, }
+  return {user, publishedDesigns , publishedDesignsCount, totalUpvotes, publishedDesigns, publishedDesignsCount }
 }
 
 const updateProfile=async({userId, updatedbio})=>{
@@ -90,4 +90,4 @@ const updateAvatar = async({userId, avatarURL })=>{
   return true;
 }
 
-export {getUserProfileByUsername, getUser, getPublishedDesignsByUser}
+export {getUserProfileByUsername, getUser, updateProfile, updateAvatar,getPublishedDesignsByUser}
