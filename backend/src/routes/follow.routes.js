@@ -13,4 +13,5 @@ router.route("/followers").get(getFollowersController)
 router.route("/following").get(getFollowingController)
 router.route("/follow-status").get(verifyJWT, getFollowStatusController)
 
+
 export default router
