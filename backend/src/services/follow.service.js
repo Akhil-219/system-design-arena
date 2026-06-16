@@ -10,12 +10,26 @@ const followUser=async({username, currentUserId})=>{
     if(followee._id.toString() ===currentUserId.toString()){
         throw new ApiError(403, "Cannot follow yourself")
     }
+    const existingFollow = await Follow.findOne({
+   followerId: currentUserId,
+   followingId: followee._id
+})
+if(existingFollow){
+   throw new ApiError(409,"Already following")
+}
     await Follow.create({
         followerId: currentUserId,
         followingId:followee._id
     })
-    followee.followingCount+=1;
-    await followee.save({validateBeforeSave:false})
+    await User.findByIdAndUpdate(
+   currentUserId,
+   { $inc: { followingCount: 1 } }
+)
+
+await User.findByIdAndUpdate(
+   followee._id,
+   { $inc: { followersCount: 1 } }
+)
     return true
 }
 
@@ -28,10 +42,19 @@ const unfollowUser=async({username, currentUserId})=>{
         throw new ApiError(403, "Cannot follow yourself")
     }
     const followStatus= await Follow.findOneAndDelete({followerId:currentUserId, followingId:followee._id})
-    followee.followersCount -=1;
-    if(!followStatus){
+    if(followStatus===null){
         throw new ApiError(404, "Unable to unfollow the person  you are not following")
     }
+    await User.findByIdAndUpdate(
+   currentUserId,
+   { $inc: { followingCount: -1 } }
+)
+
+await User.findByIdAndUpdate(
+   followee._id,
+   { $inc: { followersCount: -1 } }
+)
+
     return true
 }
 
@@ -40,7 +63,10 @@ const getFollowing=async({username})=>{
     if(!user){
         throw new ApiError(404, "User not found with that username")
     }
-    const following =await Follow.find({followerId:user._id})
+    const following =await Follow.find({followerId:user._id}).populate(
+   "followingId",
+   "username profilePicture bio"
+)
     return {following}
 }
 
@@ -49,7 +75,10 @@ const getFollowers=async({username})=>{
     if(!user){
         throw new ApiError(404, "User not found with that username")
     }
-    const followers =await Follow.find({followingId:user._id})
+    const followers =await Follow.find({followingId:user._id}).populate(
+   "followerId",
+   "username profilePicture bio"
+)
     return {followers}
 }
 
@@ -62,7 +91,10 @@ const getFollowStatus=async({username, currentUserId})=>{
     if(followee._id.toString() ===currentUserId.toString()){
         throw new ApiError(403, "Cannot see the follow status yourself")
     }
-    const followStatus=await Follow.findOne({followerId:currentUserId, followingId:followee._id})
+const followStatus = await Follow.findOne({
+   followerId: currentUserId,
+   followingId: followee._id
+});
     if(followStatus){
         return true
     }
