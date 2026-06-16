@@ -24,10 +24,13 @@ const getCommentsOfPost=async({postId})=>{
     return {comments}
 }
 
-const deletePostComment=async({commentId,userId})=>{
+const deletePostComment=async({commentId,postId,userId})=>{
     const comment= await DiscussionComment.findById(commentId)
     if(!comment){
         throw new ApiError(404, "comment not found or already deleted")
+    }
+    if(comment.postId.toString() !== postId.toString()){
+    throw new ApiError(400,"Comment does not belong to this post")
     }
     if(comment.authorId.toString() !== userId.toString()){
         throw new ApiError(403 , "Cant delete others comment")

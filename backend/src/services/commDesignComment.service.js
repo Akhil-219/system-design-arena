@@ -38,7 +38,7 @@ const getCommentsOfDesign = async ({ designId }) => {
   return { comments };
 };
 
-const deleteComment = async ({ commentId, userId }) => {
+const deleteComment = async ({ commentId,designId,userId }) => {
   const comment = await DesignComment.findById(commentId);
 
   if (!comment) {
@@ -46,6 +46,12 @@ const deleteComment = async ({ commentId, userId }) => {
   }
   if (comment.authorId.toString() !== userId.toString()) {
     throw new ApiError(403, "Cant delete another person's comment");
+  }
+  if(comment.designId.toString() !== designId.toString()){
+    throw new ApiError(
+        400,
+        "Comment does not belong to this design"
+    )
   }
   await DesignCommentVote.deleteMany({commentId:commentId})
   await DesignComment.findByIdAndDelete(commentId);

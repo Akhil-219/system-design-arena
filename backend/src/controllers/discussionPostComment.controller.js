@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const createPostCommentController=asyncHandler(async(req,res)=>{
     const {postId}=req.params
     const {comment}=req.body
-    const {createdComment}=await createPostComment({postId,commment,userId:req.user._id})
+    const {createdComment}=await createPostComment({postId,comment,userId:req.user._id})
     return res.status(201).json(new ApiResponse(201,{createdComment},"Comment created successfully"))
 })
 
@@ -16,7 +16,9 @@ const getCommentsOfPostController=asyncHandler(async(req, res)=>{
 })
 
 const deletePostCommentController=asyncHandler(async(req,res)=>{
-    const {commentId}=req.params
-    await deletePostComment({commentId, userId:req.user._id})
+    const {commentId,postId}=req.params
+    await deletePostComment({commentId,postId,userId:req.user._id})
     return res.status(200).json(new ApiResponse(200,{},"Comment deleted successfully"))
 })
+
+export {createPostCommentController, getCommentsOfPostController, deletePostCommentController}

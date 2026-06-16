@@ -20,7 +20,7 @@ const getCommentsOfDesignController= asyncHandler(async(req, res)=>{
 
 
 const deleteCommentController=asyncHandler(async(req, res)=>{
-    const {commentId}=req.params
+    const {commentId,designId}=req.params
     await deleteComment({commentId, userId:req.user._id})
     return res.status(200).json(new ApiResponse(200,{}, "Comment deleted successfully"))
 })
