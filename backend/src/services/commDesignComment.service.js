@@ -4,23 +4,21 @@ import { User } from "../models/user.model.js";
 import { DesignComment } from "../models/design_comments.model.js";
 const createCommentInCommunity = async ({ designId, comment, userId }) => {
   const design = await Design.findById(designId);
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
   if (!design) {
     throw new ApiError(404, "Design not found");
   }
   if (!design.isPosted) {
     throw new ApiError(400, "Cannot comment on unpublished design");
   }
+  if (!comment?.trim()) {
+  throw new ApiError(400, "Comment cannot be empty");
+}
   const createdComment = await DesignComment.create({
     designId: designId,
     authorId: userId,
     content: comment,
   });
-  const prevCount=desgin.commentCount
-  designId.commentCount=prevCount+1;
+  design.commentCount+=1;
   await design.save({validateBeforeSave:false})
   return { createdComment };
 };
@@ -33,7 +31,7 @@ const getCommentsOfDesign =async({designId})=>{
     if(!design.isPosted){
         throw new ApiError(400,"Cant access the comments of unpublished design")
     }
-    const comments= await DesignComment.find({designId:design._id}).populate("authorId","username profilePicture reputation")
+    const comments= await DesignComment.find({designId:design._id}).populate("authorId","username profilePicture reputation").sort({ createdAt: -1 })
     return {comments}
 }
 
@@ -46,10 +44,10 @@ const deleteComment= async({commentId,userId})=>{
     if(comment.authorId.toString() !== userId.toString()){
         throw new ApiError(403,"Cant delete another person's comment")
     }
+    await DesignComment.findByIdAndDelete(commentId)
     const design =await Design.findById(comment.designId)
-    const prevCount=design.commentCount;
-    design.commentCount=prevCount-1;
-    await DesignComment.delete({_id:commentId})
+    design.commentCount-=1;
+    await design.save({ validateBeforeSave:false });
     return true
 }
 

@@ -3,7 +3,9 @@ import { Version } from "../models/versions.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Problem } from "../models/problems.model.js";
 import { createSnapshot } from "./version.service.js";
-
+import { AiReview } from "../models/ai_reviews.model.js";
+import { DesignComment } from "../models/design_comments.model.js";
+import { DesignVote } from "../models/design_votes.model.js";
 const createDesign = async ({ problemId, userId, diagramData, notes }) => {
   const problem = await Problem.findById(problemId);
   const draftDiagramData = diagramData;
@@ -85,8 +87,30 @@ const deleteDesign = async ({ designId, userId }) => {
   if (design.ownerId.toString() !== userId.toString()) {
     throw new ApiError(403, "Access denied");
   }
-  await Version.deleteMany({ designId: design._id });
-  await Design.findByIdAndDelete(designId);
+  const versionIds = await Version.find(
+  { designId: design._id },
+  "_id"
+);
+
+await AiReview.deleteMany({
+  versionId: {
+    $in: versionIds.map(v => v._id)
+  }
+});
+
+await Version.deleteMany({
+    designId: design._id
+});
+
+await DesignComment.deleteMany({
+    designId: design._id
+});
+
+await DesignVote.deleteMany({
+    designId: design._id
+});
+
+await Design.findByIdAndDelete(design._id);
   return true;
 };
 
