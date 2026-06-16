@@ -11,7 +11,7 @@ const createUpVotePost=async({postId, userId})=>{
     if(existingVote){
         throw new ApiError(400, "You have already liked the post")
     }
-    await DiscussionPostVote.create({postId:post,userId:userId})
+    await DiscussionPostVote.create({postId:postId,userId:userId})
     await DiscussionPost.findByIdAndUpdate(postId,{$inc:{upvoteCount:1}})
     return true
 }
@@ -21,7 +21,7 @@ const deleteUpVotePost=async({postId, userId})=>{
     if(!post){
         throw new ApiError(404, "Post not found")
     }
-    const existingVote= await DiscussionPostVote.findOne({postId:post,userId:userId})
+    const existingVote= await DiscussionPostVote.findOne({postId:postId,userId:userId})
     if(!existingVote){
         throw new ApiError(400, "Cant unlike the post again")
     }
