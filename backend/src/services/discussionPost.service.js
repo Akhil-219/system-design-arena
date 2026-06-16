@@ -41,6 +41,8 @@ const deleteDiscussionPost=async({postId,userId})=>{
 }
 
 const getDiscussionPostById=async(postId)=>{
-    const Post=await DiscussionPost.findById(postId).populate("authorId","username profilePicture").populate("content")
-    return {Post}
+    const post=await DiscussionPost.findById(postId).populate("authorId","username profilePicture").populate("content")
+    return {post}
 }
+
+export {createPostInDiscussion, getAllDiscussionPosts, getDiscussionPostById, deleteDiscussionPost}
