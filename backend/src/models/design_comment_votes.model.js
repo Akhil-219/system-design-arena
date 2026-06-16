@@ -18,4 +18,4 @@ designCommentVoteSchema.index(
     { unique: true }
 );
 
-export const DesignComment_vote=mongoose.model("DesignCommentVote",designCommentVoteSchema)
+export const DesignCommentVote=mongoose.model("DesignCommentVote",designCommentVoteSchema)
