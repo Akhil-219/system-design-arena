@@ -15,6 +15,7 @@ const createCommentUpVote=async({commentId, userId})=>{
         commentId,
         userId
     })
+    const designId=comment.designId
     await DesignComment.findByIdAndUpdate(designId, { $inc: { upvoteCount: 1 } });
     return true
 }
@@ -29,6 +30,9 @@ const deleteCommentUpVote=async({commentId,userId})=>{
         throw new ApiError(400, "cant downvote the comment again")
     }
     await DesignCommentVote.findOneAndDelete({commentId,userId})
+    const designId=comment.designId
     await DesignComment.findByIdAndUpdate(designId, { $inc: { upvoteCount: -1 } });
     return true
 }
+
+export {createCommentUpVote, deleteCommentUpVote}
