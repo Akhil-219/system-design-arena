@@ -7,9 +7,12 @@ const getUserProfileByUsername = async ({ username }) => {
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  const publishedDesigns =await getPublishedDesignsByUser({username})
-  const publishedDesignsCount =(await publishedDesigns).length
-  const totalUpvotes = await Design.aggregate([
+  const publishedDesignsCount =
+ await Design.countDocuments({
+   ownerId:user._id,
+   isPosted:true
+ })
+  const aggregateResult= await Design.aggregate([
     {
       $match: {
         ownerId: user._id,
@@ -25,6 +28,7 @@ const getUserProfileByUsername = async ({ username }) => {
       },
     },
   ]);
+  const totalUpvotes=aggregateResult[0]?.total || 0;
   return {user,publishedDesignsCount, totalUpvotes}
 };
 
@@ -33,19 +37,22 @@ const getPublishedDesignsByUser = async({username})=>{
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  const {publishedDesigns} =await Design.find({ isPosted: true, ownerId: user._id }).populate(problemId,
-postedVersion);
+  const publishedDesigns =await Design.find({ isPosted: true, ownerId: user._id }).populate("problemId")
+.populate("postedVersion")
   return {publishedDesigns}
 }
 
 const getUser=async({userId})=>{
-    const user= await User.findById(userId).select("-email -password -refreshToken -isVerified")
+    const user= await User.findById(userId).select("-password -refreshToken -isVerified")
     if(!user){
         throw new ApiError(404, "User not found")
     }
-    const publishedDesigns =await getPublishedDesignsByUser({username:user.username})
-  const publishedDesignsCount =(await publishedDesigns).length
-  const totalUpvotes = await Design.aggregate([
+  const publishedDesignsCount =
+ await Design.countDocuments({
+   ownerId:user._id,
+   isPosted:true
+ })
+  const aggregateResult= await Design.aggregate([
     {
       $match: {
         ownerId: user._id,
@@ -61,28 +68,28 @@ const getUser=async({userId})=>{
       },
     },
   ]);
-  return {user, publishedDesigns , publishedDesignsCount, totalUpvotes, publishedDesigns, publishedDesignsCount }
+  const totalUpvotes=aggregateResult[0]?.total || 0;
+  return {user, totalUpvotes, publishedDesignsCount }
 }
 
 const updateProfile=async({userId, updatedbio})=>{
-    const user =await User.findById(userId)
+    const user =await User.findOneAndReplace({_id:userId},{bio:updatedbio}, {new:true})
     if(!user){
       throw new ApiError(404,"User not found")
     }
-    await User.findOneAndUpdate({_id:userId},{bio:updatedbio}, {new:true})
-    return true
+    return {user}
 }
 
-const updateAvatar = async({userId, avatarURL })=>{
-  const avatar = await uploadCloudinary(avatarLocalPath);
-  if (!avatar.url) {
+const updateAvatar = async({userId, profilePictureURL })=>{
+  const profilePicture = await uploadCloudinary(profilePictureURL);
+  if (!profilePicture?.url) {
     throw new ApiError(500, "Internal uploading issue");
   }
-  const user = await User.findByIdAndUpdate(
-    req.user._id,
+  await User.findByIdAndReplace(
+    userId,
     {
       $set: {
-        avatar: avatar.url,
+        profilePicture: profilePicture.url,
       },
     },
     { new: true },

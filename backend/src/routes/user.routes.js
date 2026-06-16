@@ -5,10 +5,11 @@ import { getPublishedDesignsByUserController, getUserController, getUserProfileB
 
 const router= Router()
 
-router.route("/:username/designs").get(getPublishedDesignsByUserController)
-router.route("/:username").get(getUserProfileByUsernameController)
 router.route("/me").get(verifyJWT,getUserController)
 router.route("/profile").patch(verifyJWT,updateProfileController)
-router.route("/profile-picture").patch(verifyJWT,upload.single("profile-picture"), updateAvatarController)
+router.route("/profile-picture").patch(verifyJWT,upload.single("profilePictureURL"), updateAvatarController)
+router.route("/:username/designs").get(getPublishedDesignsByUserController)
+router.route("/:username").get(getUserProfileByUsernameController)
+
 
 export default router
