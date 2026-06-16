@@ -2,6 +2,7 @@ import { Design } from "../models/design.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { DesignComment } from "../models/design_comments.model.js";
+import { DesignCommentVote } from "../models/design_comment_votes.model.js";
 const createCommentInCommunity = async ({ designId, comment, userId }) => {
   const design = await Design.findById(designId);
   if (!design) {
@@ -46,6 +47,7 @@ const deleteComment = async ({ commentId, userId }) => {
   if (comment.authorId.toString() !== userId.toString()) {
     throw new ApiError(403, "Cant delete another person's comment");
   }
+  await DesignCommentVote.deleteMany({commentId:commentId})
   await DesignComment.findByIdAndDelete(commentId);
   const design = await Design.findById(comment.designId);
   design.commentCount -= 1;
