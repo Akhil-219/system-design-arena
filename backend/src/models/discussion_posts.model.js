@@ -19,6 +19,10 @@ const discussionPostSchema = new Schema({
         type:Number,
         default:0,
     },
+    commentCount: {
+        type: Number,
+        default: 0
+    }
 },{timestamps:true})
 
 export const DiscussionPost= mongoose.model("DiscussionPost", discussionPostSchema)
