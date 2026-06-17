@@ -5,6 +5,8 @@ import { openRouterClient } from "../ai/openRouter.js"
 import {Problem} from "../models/problems.model.js"
 import {ApiError} from "../utils/ApiError.js"
 
+import { generateMentorResponse } from "../utils/aiMentorMessageGenerator.js"
+
 const createConversation=async({problemId, userId})=>{
     const problem = await Problem.findById(problemId)
     if(!problem){
@@ -38,6 +40,9 @@ const sendMessage = async ({conversationId,content,userId}) => {
     if(conversation.userId.toString() !== userId.toString()){
         throw new ApiError(403, " Cant access another mentor messages")
     }
+    if(!content?.trim()){
+        throw new ApiError(400, "Message cant be empty")
+    }
         
     const userMessage =await MentorMessage.create({
             conversationId,
@@ -45,7 +50,8 @@ const sendMessage = async ({conversationId,content,userId}) => {
             content:content
         });
 
-    const history = await MentorMessage.find({conversationId}).sort({createdAt:1});
+    const history = await MentorMessage.find({conversationId}).sort({createdAt:1}).limit(20);
+    history.reverse()
     const messages = history.map(message => ({
     role:
         message.role === "USER"
@@ -62,12 +68,7 @@ const sendMessage = async ({conversationId,content,userId}) => {
         role:"system",
         content: systemPrompt
     });
-    const completion =
-    await openRouterClient.chat.completions.create({
-        model:"google/gemini-2.5-flash",
-        messages
-    });
-    const aiReply =completion.choices[0].message.content;
+    const aiReply= await generateMentorResponse(messages);
     const aiMessage =await MentorMessage.create({
         conversationId,
         role:"AI",
