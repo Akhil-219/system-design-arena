@@ -1,6 +1,6 @@
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
-import { createConversation, getConversation } from "../services/aiMentor.service.js"
+import { createConversation, getConversation, getMessages, sendMessage } from "../services/aiMentor.service.js"
 
 const createConversationController=asyncHandler(async(req,res)=>{
     const {problemId} =req.params
@@ -13,5 +13,17 @@ const getConversationController= asyncHandler(async(req,res)=>{
     const {conversation}=await getConversation({conversationId, userId:req.user._id})
     return res.status(200).json(new ApiResponse(200, {conversation},"Conversation fetched successfully"))
 })
+const sendMessageController=asyncHandler(async(req,res)=>{
+    const {conversationId}= req.params
+    const {content}= req.body
+    const {userMessage , aiMessage}= await sendMessage({conversationId,content,userId:req.user._id})
+    return res.status(200).json(new ApiResponse(200, {userMessage, aiMessage}, "Message sent successfully"))
+})
 
-export {createConversationController, getConversationController}
+const getMessagesController=asyncHandler(async(req,res)=>{
+    const {conversationId}= req.params
+    const {messages}= await getMessages({conversationId, userId:req.user._id})
+    return res.status(200).json(new ApiResponse(200, {messages},"Messages fetched successfully"))
+})
+
+export {createConversationController, getConversationController, sendMessageController,getMessagesController}
