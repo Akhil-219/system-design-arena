@@ -1,9 +1,9 @@
-import { getDashboard } from "../services/dashboard.service"
-import {ApiResponse} from "../utils/ApiResponse"
-
+import { getDashboard } from "../services/dashboard.service.js"
+import {ApiResponse} from "../utils/ApiResponse.js"
+import { asyncHandler } from "../utils/asyncHandler.js"
 const getDashboardController = asyncHandler(async(req,res)=>{
-    const {designCount,publishedDesignCount,totalUpvotes,totalCommentupVotes,totalMentorConversationsCount,recentDesigns,recentDiscussion} =await getDashboard({userId:user._id})
-    return res.status(200).json(new ApiResponse(200, {}, "fecthed dashboard"))
+    const dashboard=await getDashboard({userId:req.user._id})
+    return res.status(200).json(new ApiResponse(200, dashboard, "Fecthed dashboard"))
 })
 
 export {getDashboardController}
