@@ -12,5 +12,12 @@ const mentorConversationSchema= new Schema({
         required:true,
     }
 },{timestamps:true})
+mentorConversationSchema.index({
+    userId: 1,
+    problemId: 1
+},
+{
+    unique: true
+});
 
 export const MentorConversation= mongoose.model("MentorConversation", mentorConversationSchema)

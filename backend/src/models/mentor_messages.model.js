@@ -16,5 +16,9 @@ const mentorMessageSchema= new Schema({
         required:true,
     }
 },{timestamps:true})
+mentorMessageSchema.index({
+    conversationId: 1,
+    createdAt: 1
+});
 
 export const MentorMessage=mongoose.model("MentorMessage",mentorMessageSchema)
