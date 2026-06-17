@@ -110,6 +110,9 @@ const refreshAccessToken=async(incomingRefreshToken)=>{
         refreshToken
     }
 };
+const getCurrentUser=async({user})=>{
+    return user
+}
 
 const logoutUser=async (userId)=>{
     // find the user , 
@@ -125,4 +128,4 @@ const logoutUser=async (userId)=>{
     return true
 }
 
-export {registerUser, loginUser, refreshAccessToken, logoutUser}
+export {registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser}
