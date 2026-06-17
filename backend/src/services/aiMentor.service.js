@@ -26,3 +26,5 @@ const getConversation =async({conversationId, userId})=>{
     }
     return {conversation}
 }
+
+export {createConversation, getConversation}
