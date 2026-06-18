@@ -8,16 +8,23 @@ import MainLayout from "../layouts/MainLayout";
 import Community from "../pages/Community";
 import Mentor from "../pages/Mentor";
 import Dashboard from "../pages/Dashboard";
-
+import ProtectedRoutes from "./ProtectedRoutes";
 function AppRoutes() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/problems" element={<Problems />} />
-        <Route path="/community" element={<Community/>}/>
-        <Route path="/mentor" element={<Mentor/>}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
+        <Route path="/community" element={<Community />} />
+        <Route path="/mentor" element={<Mentor />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoutes>
+              <Dashboard />
+            </ProtectedRoutes>
+          }
+        />
       </Route>
 
       <Route path="/login" element={<Login />} />
