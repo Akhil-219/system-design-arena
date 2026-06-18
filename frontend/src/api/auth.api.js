@@ -11,7 +11,7 @@ export const registerUser = async (data) => {
 };
 
 export const getCurrentUser = async () => {
-    const response = await api.get("/auth/current-user");
+    const response = await api.get("/users/me");
     return response.data.data.user;
 };
 

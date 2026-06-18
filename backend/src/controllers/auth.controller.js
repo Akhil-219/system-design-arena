@@ -8,6 +8,7 @@ const registerUserController=asyncHandler(async(req,res)=>{
     const options={
         httpOnly:true,
         secure: process.env.NODE_ENV === "production",
+        sameSite:lax,
     }
     return res
     .status(201)
@@ -23,13 +24,13 @@ const getCurrentUserController=asyncHandler(async(req,res)=>{
     const user = await getCurrentUser({user:req.user})
     return res.status(200).json(new ApiResponse(200, {user}, "Fetched current user"))
 })
-
 const loginUserController=asyncHandler(async (req, res)=>{
     const {login, password} =req.body
     const {user, accessToken, refreshToken}= await loginUser({login,password})
     const options={
         httpOnly:true,
         secure: process.env.NODE_ENV === "production",
+        sameSite:lax,
     }
     return res
     .status(200)
@@ -48,6 +49,7 @@ const refreshAccessTokenController =asyncHandler(async(req, res)=>{
     const options={
         httpOnly:true,
         secure: process.env.NODE_ENV === "production",
+        sameSite:lax,
     }
     return res
     .status(200)
@@ -69,6 +71,7 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite:lax,
   };
   return res
     .status(200)
