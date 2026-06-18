@@ -1,4 +1,4 @@
-import { loginUser, registerUser , refreshAccessToken, logoutUser } from "../services/auth.service.js"
+import { loginUser, registerUser , refreshAccessToken, logoutUser, getCurrentUser } from "../services/auth.service.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
@@ -18,6 +18,10 @@ const registerUserController=asyncHandler(async(req,res)=>{
         { user }, // make sure to remove the tokens this after the frontend development 
         "User registered successfully" 
     ))
+})
+const getCurrentUserController=asyncHandler(async(req,res)=>{
+    const user = await getCurrentUser({user:req.user})
+    return res.status(200).json(new ApiResponse(200, {user}, "Fetched current user"))
 })
 
 const loginUserController=asyncHandler(async (req, res)=>{
@@ -73,4 +77,4 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200, {}, "logged out successfully "));
 })
 
-export {loginUserController, logoutUserController, refreshAccessTokenController, registerUserController}
+export {loginUserController, logoutUserController, refreshAccessTokenController, registerUserController,getCurrentUserController}
