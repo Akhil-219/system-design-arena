@@ -3,7 +3,7 @@ import { getProblemBySlug } from "../services/problemService";
 import { useParams, useNavigate } from "react-router-dom";
 
 function ProblemDetailsPage() {
-  const [problem, setProblem] = useState({});
+  const [problem, setProblem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("description");
@@ -35,15 +35,15 @@ function ProblemDetailsPage() {
   }
   return (
     <>
-      <div>
-        <button onClick={() => navigate("/problems")}>Go back</button>
-        <h1>{problem.title}</h1>
-        <div>
-          <span onClick={() => setActiveTab("description")}>Description</span>
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <button className="mb-6" onClick={() => navigate("/problems") }>Go back</button>
+        <h1 className="text-3xl font-semibold mb-8">{problem.title}</h1>
+        <div className="flex gap-8 mb-6 border-b pb-3">
+          <button className="font-medium" onClick={() => setActiveTab("description")}>Description</button>
 
-          <span onClick={() => setActiveTab("requirements")}>Requirements</span>
+          <button className="font-medium" onClick={() => setActiveTab("requirements")}>Requirements</button>
 
-          <span onClick={() => setActiveTab("constraints")}>Constraints</span>
+          <button  className="font-medium" onClick={() => setActiveTab("constraints")}>Constraints</button>
         </div>
         {activeTab === "description" && (
           <div>
@@ -74,12 +74,12 @@ function ProblemDetailsPage() {
         <div>
           <h3>Tags</h3>
           <ul>
-            {problem.tags.map((tag, index) => (
+            {problem.tags?.map((tag, index) => (
               <li key={index}>{tag}</li>
             ))}
           </ul>
         </div>
-        <button>Start Designing</button>
+        <button className="px-6 py-2">Start Designing</button>
       </div>
     </>
   );
