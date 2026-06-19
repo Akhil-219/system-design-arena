@@ -1,32 +1,33 @@
 import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
-import Problems from "../pages/Problems";
+import Login from "../features/auth/pages/Login";
+import Register from "../features/auth/pages/Register";
+import ProblemsPage from "../features/problems/pages/ProblemsPage";
 import MainLayout from "../layouts/MainLayout";
-import Community from "../pages/Community";
-import Mentor from "../pages/Mentor";
-import Dashboard from "../pages/Dashboard";
+import CommunityPage from "../features/community/pages/CommunityPage";
+import MentorPage from "../features/mentor/pages/MentorPage";
+import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import ProtectedRoutes from "./ProtectedRoutes";
+import ProblemDetailsPage from "../features/problems/pages/ProblemDetailsPage";
 function AppRoutes() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/problems" element={<Problems />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/mentor" element={<Mentor />} />
+        <Route path="/problems" element={<ProblemsPage />} />
+        <Route path="/community" element={<CommunityPage />} />
+        <Route path="/mentor" element={<MentorPage />} />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoutes>
-              <Dashboard />
+              <DashboardPage />
             </ProtectedRoutes>
           }
         />
       </Route>
-
+      <Route path="/problems/:slug" element={<ProblemDetailsPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
     </Routes>
