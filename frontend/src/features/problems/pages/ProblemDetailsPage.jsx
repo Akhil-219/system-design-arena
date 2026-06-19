@@ -36,14 +36,31 @@ function ProblemDetailsPage() {
   return (
     <>
       <div className="max-w-4xl mx-auto px-6 py-8">
-        <button className="mb-6" onClick={() => navigate("/problems") }>Go back</button>
+        <button className="mb-6" onClick={() => navigate("/problems")}>
+          Go back
+        </button>
         <h1 className="text-3xl font-semibold mb-8">{problem.title}</h1>
         <div className="flex gap-8 mb-6 border-b pb-3">
-          <button className="font-medium" onClick={() => setActiveTab("description")}>Description</button>
+          <button
+            className="font-medium"
+            onClick={() => setActiveTab("description")}
+          >
+            Description
+          </button>
 
-          <button className="font-medium" onClick={() => setActiveTab("requirements")}>Requirements</button>
+          <button
+            className="font-medium"
+            onClick={() => setActiveTab("requirements")}
+          >
+            Requirements
+          </button>
 
-          <button  className="font-medium" onClick={() => setActiveTab("constraints")}>Constraints</button>
+          <button
+            className="font-medium"
+            onClick={() => setActiveTab("constraints")}
+          >
+            Constraints
+          </button>
         </div>
         {activeTab === "description" && (
           <div>
@@ -79,7 +96,12 @@ function ProblemDetailsPage() {
             ))}
           </ul>
         </div>
-        <button className="px-6 py-2">Start Designing</button>
+        <button
+          className="px-6 py-2"
+          onClick={() => navigate(`/design/${problem._id}`)}
+        >
+          Start Designing
+        </button>
       </div>
     </>
   );

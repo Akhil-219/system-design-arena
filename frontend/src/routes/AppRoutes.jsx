@@ -10,6 +10,7 @@ import MentorPage from "../features/mentor/pages/MentorPage";
 import DashboardPage from "../features/dashboard/pages/DashboardPage";
 import ProtectedRoutes from "./ProtectedRoutes";
 import ProblemDetailsPage from "../features/problems/pages/ProblemDetailsPage";
+import DesignCanvasPage from "../features/design/pages/DesignCanvasPage";
 function AppRoutes() {
   return (
     <Routes>
@@ -30,6 +31,11 @@ function AppRoutes() {
       <Route path="/problems/:slug" element={<ProblemDetailsPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/design/:problemId" element={
+        <ProtectedRoutes>
+        <DesignCanvasPage/>
+        </ProtectedRoutes>
+        }/>
     </Routes>
   );
 }
