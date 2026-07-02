@@ -1,4 +1,5 @@
 import { Problem } from "../models/problems.model.js";
+import { Design } from "../models/design.model.js";
 import { ApiError } from "../utils/ApiError.js";
 const getProblems = async (params) => {
   //we will get the parameters , we have to desturcturise them
@@ -28,13 +29,27 @@ const getProblems = async (params) => {
     Problem.find(query)
       .skip((page - 1) * limit)
       .limit(limit)
-      .sort({ title: 1 }),
+      .sort({ title: 1 })
+      .lean(),
     Problem.countDocuments(query),
   ]);
 
+  const problemIds = problems.map((problem) => problem._id);
+  const designCounts = await Design.aggregate([
+    { $match: { problemId: { $in: problemIds } } },
+    { $group: { _id: "$problemId", designCount: { $sum: 1 } } },
+  ]);
+  const countByProblemId = new Map(
+    designCounts.map((item) => [item._id.toString(), item.designCount])
+  );
+  const problemsWithCounts = problems.map((problem) => ({
+    ...problem,
+    designCount: countByProblemId.get(problem._id.toString()) || 0,
+  }));
+
   const totalPages = Math.ceil(total / limit);
   return {
-    problems,
+    problems: problemsWithCounts,
     pagination: {
       page,
       limit,
@@ -54,12 +69,16 @@ const getProblemBySlug = async (params) => {
   }
   const requestedSlug = slug.toLowerCase();
 
-  const problem = await Problem.findOne({ slug: requestedSlug });
+  const problem = await Problem.findOne({ slug: requestedSlug }).lean();
   if (!problem) {
     throw new ApiError(404, "Problem not found");
   }
+  const designCount = await Design.countDocuments({ problemId: problem._id });
   return {
-    problem,
+    problem: {
+      ...problem,
+      designCount,
+    },
   };
 };
 
