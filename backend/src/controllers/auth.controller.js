@@ -30,7 +30,7 @@ const loginUserController=asyncHandler(async (req, res)=>{
     const options={
         httpOnly:true,
         secure: process.env.NODE_ENV === "production",
-        sameSite:lax,
+        sameSite:"lax",
     }
     return res
     .status(200)
