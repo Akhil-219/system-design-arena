@@ -46,6 +46,7 @@ function ProblemDetailsPage() {
 
   const handleStartDesigning = () => {
     if (!user) {
+      sessionStorage.setItem("redirectAfterLogin", location.pathname);
       navigate("/login", { state: { from: location.pathname } });
       return;
     }
