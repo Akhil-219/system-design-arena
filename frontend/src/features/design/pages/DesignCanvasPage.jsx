@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ReactFlowProvider } from "reactflow";
 
 import Canvas from "../components/Canvas";
@@ -66,7 +66,9 @@ function DesignCanvasPage() {
 // Split out so useCanvas (which needs draftDiagramData up front) only
 // mounts once the design has actually loaded.
 function DesignCanvasContent({ design, problemId }) {
+  const navigate = useNavigate();
   const canvas = useCanvas(design?.draftDiagramData);
+  const [notes, setNotes] = useState(design?.draftNotes ?? "");
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | no-changes | error
 
   const [isReviewPanelOpen, setIsReviewPanelOpen] = useState(false);
@@ -100,7 +102,7 @@ function DesignCanvasContent({ design, problemId }) {
       // Step 1: persist current canvas state as the draft
       await updateDesign(design._id, {
         diagramData: { nodes: canvas.nodes, edges: canvas.edges },
-        notes: design.draftNotes ?? "",
+        notes,
       });
 
       // Step 2: try to snapshot it as a new Version (backend dedupes)
@@ -148,9 +150,17 @@ function DesignCanvasContent({ design, problemId }) {
       <div className="w-full h-screen flex flex-col bg-[#0a0a0a]">
         {/* Header toolbar */}
         <header className="flex items-center justify-between border-b border-gray-800 px-4 py-3 shrink-0">
-          <h1 className="text-sm text-white font-medium truncate">
-            {problem?.title ?? "Untitled Problem"}
-          </h1>
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => navigate(`/problems/${problemId}`)}
+              className="font-mono text-xs uppercase tracking-wider text-gray-400 hover:text-white transition-colors shrink-0"
+            >
+              ← Back
+            </button>
+            <h1 className="text-sm text-white font-medium truncate">
+              {problem?.title ?? "Untitled Problem"}
+            </h1>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handlePublish}
@@ -181,6 +191,8 @@ function DesignCanvasContent({ design, problemId }) {
               description={problem?.description}
               requirements={problem?.requirements ?? []}
               constraints={problem?.constraints ?? []}
+              notes={notes}
+              onNotesChange={setNotes}
             />
             {/* Drag handle: hover/active feedback via a thin highlight, wide
                 invisible hit-area so it's easy to grab */}
@@ -200,6 +212,7 @@ function DesignCanvasContent({ design, problemId }) {
                 onNodesChange={canvas.onNodesChange}
                 onEdgesChange={canvas.onEdgesChange}
                 onConnect={canvas.onConnect}
+                onNodeLabelChange={canvas.updateNodeLabel}
               />
               <NodePalette onAddNode={canvas.addNode} />
               <AiMentorButton />

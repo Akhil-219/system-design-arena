@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const TABS = ["Description", "Requirements", "Constraints", "Community"];
+const TABS = ["Description", "Requirements", "Constraints", "Notes", "Community"];
 
 // Replaces the old slide-over RequirementsPanel. Docked permanently on the
 // left, tabbed like LeetCode's Description/Solutions split, instead of
 // overlaying the canvas.
-function LeftPanel({ problemId, title, description, requirements = [], constraints = [] }) {
+function LeftPanel({
+  problemId,
+  title,
+  description,
+  requirements = [],
+  constraints = [],
+  notes,
+  onNotesChange,
+}) {
   const [activeTab, setActiveTab] = useState("Description");
 
   return (
@@ -75,6 +83,25 @@ function LeftPanel({ problemId, title, description, requirements = [], constrain
               </ul>
             )}
           </section>
+        )}
+
+        {activeTab === "Notes" && (
+          <div className="h-full flex flex-col">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-gray-500 mb-2">
+              Design Notes
+            </h3>
+            <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+              Explain your assumptions, data flow, and why you chose each
+              component. The AI review weighs this heavily — a diagram alone
+              isn't enough to demonstrate your reasoning.
+            </p>
+            <textarea
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="e.g. Client requests hit an NGINX load balancer, which routes to a pool of stateless API servers. Writes go through a Kafka queue to decouple ingestion from processing..."
+              className="flex-1 min-h-[240px] w-full bg-[#111111] border border-gray-800 rounded-md p-3 text-sm text-gray-200 placeholder:text-gray-600 resize-none outline-none focus:border-gray-600"
+            />
+          </div>
         )}
 
         {activeTab === "Community" && (
