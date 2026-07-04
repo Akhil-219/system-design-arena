@@ -1,16 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { ReactFlowProvider } from "reactflow";
 
 import Canvas from "../components/Canvas";
 import NodePalette from "../components/NodePalette";
-import RequirementsPanel from "../components/RequirementsPanel";
+import LeftPanel from "../components/LeftPanel";
+import ReviewPanel from "../../review/components/ReviewPanel";
+import AiMentorButton from "../../mentor/components/AiMentorButton";
 import { useCanvas } from "../hooks/useCanvas";
+import { useResizable } from "../hooks/useResizable";
 import {
   startDesign,
   updateDesign,
   createVersionSnapshot,
 } from "../services/designService";
+import { generateReview } from "../../review/services/aiReviewService";
+import { getAllVersions } from "../services/versionService";
 
 function DesignCanvasPage() {
   const { problemId } = useParams();
@@ -39,41 +44,6 @@ function DesignCanvasPage() {
     };
   }, [problemId]);
 
-  return (
-    <DesignCanvasContent design={design} isLoading={isLoading} error={error} />
-  );
-}
-
-// Split out so useCanvas (which needs draftDiagramData up front) only
-// mounts once the design has actually loaded.
-function DesignCanvasContent({ design, isLoading, error }) {
-  const canvas = useCanvas(design?.draftDiagramData);
-  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | no-changes | error
-
-  const handleSave = async () => {
-    if (!design?._id) return;
-    setSaveState("saving");
-    try {
-      // Step 1: persist current canvas state as the draft
-      await updateDesign(design._id, {
-        diagramData: { nodes: canvas.nodes, edges: canvas.edges },
-        notes: design.draftNotes ?? "",
-      });
-      // Step 2: try to snapshot it as a new Version (backend dedupes)
-      await createVersionSnapshot(design._id);
-      setSaveState("saved");
-    } catch (err) {
-      // "No changes detected since last snapshot" is a 400 but not a real error
-      if (err?.response?.status === 400) {
-        setSaveState("no-changes");
-      } else {
-        setSaveState("error");
-      }
-    } finally {
-      setTimeout(() => setSaveState("idle"), 2000);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-[#0a0a0a]">
@@ -90,37 +60,163 @@ function DesignCanvasContent({ design, isLoading, error }) {
     );
   }
 
+  return <DesignCanvasContent design={design} problemId={problemId} />;
+}
+
+// Split out so useCanvas (which needs draftDiagramData up front) only
+// mounts once the design has actually loaded.
+function DesignCanvasContent({ design, problemId }) {
+  const canvas = useCanvas(design?.draftDiagramData);
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | no-changes | error
+
+  const [isReviewPanelOpen, setIsReviewPanelOpen] = useState(false);
+  const [review, setReview] = useState(null);
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+  const [versions, setVersions] = useState([]);
+
+  const leftPanel = useResizable({ axis: "x", initialSize: 380, min: 280, max: 640 });
+  const reviewPanel = useResizable({ axis: "y", initialSize: 288, min: 44, max: 560 });
+
+  const refreshVersions = useCallback(async () => {
+    if (!design?._id) return;
+    try {
+      const fetchedVersions = await getAllVersions(design._id);
+      setVersions(fetchedVersions);
+    } catch {
+      // Version history is a nice-to-have here — a failed fetch shouldn't
+      // block the save flow, so we swallow it silently.
+    }
+  }, [design?._id]);
+
+  useEffect(() => {
+    refreshVersions();
+  }, [refreshVersions]);
+
+  const handleSave = async () => {
+    if (!design?._id) return;
+    setSaveState("saving");
+    try {
+      // Step 1: persist current canvas state as the draft
+      await updateDesign(design._id, {
+        diagramData: { nodes: canvas.nodes, edges: canvas.edges },
+        notes: design.draftNotes ?? "",
+      });
+
+      // Step 2: try to snapshot it as a new Version (backend dedupes)
+      const version = await createVersionSnapshot(design._id);
+      setSaveState("saved");
+      refreshVersions();
+
+      // Step 3: kick off an AI review of the new version
+      setIsReviewPanelOpen(true);
+      setIsReviewLoading(true);
+      setReviewError(null);
+      try {
+        const newReview = await generateReview(design._id, version._id);
+        setReview(newReview);
+      } catch (reviewErr) {
+        setReviewError(
+          reviewErr?.response?.data?.message || "Couldn't generate a review for this version."
+        );
+      } finally {
+        setIsReviewLoading(false);
+      }
+    } catch (err) {
+      // "No changes detected since last snapshot" is a 400 but not a real error
+      if (err?.response?.status === 400) {
+        setSaveState("no-changes");
+      } else {
+        setSaveState("error");
+      }
+    } finally {
+      setTimeout(() => setSaveState("idle"), 2000);
+    }
+  };
+
+  const handlePublish = () => {
+    // TODO: wire up to the community-designs publish endpoint once it
+    // exists. Publishing is a deliberate, separate action from saving —
+    // saving a version should never make a design visible to others.
+    console.log("Publish coming soon");
+  };
+
   const problem = design?.problemId; // populated Problem doc
 
   return (
     <ReactFlowProvider>
-      <div className="relative w-full h-screen">
-        <Canvas
-          nodes={canvas.nodes}
-          edges={canvas.edges}
-          onNodesChange={canvas.onNodesChange}
-          onEdgesChange={canvas.onEdgesChange}
-          onConnect={canvas.onConnect}
-        />
-        <NodePalette onAddNode={canvas.addNode} />
+      <div className="w-full h-screen flex flex-col bg-[#0a0a0a]">
+        {/* Header toolbar */}
+        <header className="flex items-center justify-between border-b border-gray-800 px-4 py-3 shrink-0">
+          <h1 className="text-sm text-white font-medium truncate">
+            {problem?.title ?? "Untitled Problem"}
+          </h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePublish}
+              className="font-mono text-xs uppercase tracking-wider text-gray-300 border border-gray-800 rounded-md px-4 py-2 hover:bg-[#1a1a1a] hover:text-white transition-colors"
+            >
+              Publish
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saveState === "saving"}
+              className="font-mono text-xs uppercase tracking-wider text-black bg-white rounded-md px-4 py-2 hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              {saveState === "saving" && "Saving…"}
+              {saveState === "saved" && "Saved ✓"}
+              {saveState === "no-changes" && "No changes"}
+              {saveState === "error" && "Save failed"}
+              {saveState === "idle" && "Save"}
+            </button>
+          </div>
+        </header>
 
-        <button
-          onClick={handleSave}
-          disabled={saveState === "saving"}
-          className="absolute bottom-4 left-4 z-10 font-mono text-xs uppercase tracking-wider text-gray-300 bg-[#111111] border border-gray-800 rounded-md px-4 py-2 hover:bg-[#1a1a1a] hover:text-white transition-colors disabled:opacity-50"
-        >
-          {saveState === "saving" && "Saving…"}
-          {saveState === "saved" && "Saved ✓"}
-          {saveState === "no-changes" && "No changes"}
-          {saveState === "error" && "Save failed"}
-          {saveState === "idle" && "Save"}
-        </button>
+        {/* Body: left panel + right column */}
+        <div className="flex-1 flex overflow-hidden">
+          <div className="shrink-0 h-full relative" style={{ width: leftPanel.size }}>
+            <LeftPanel
+              problemId={problemId}
+              title={problem?.title ?? "Untitled Problem"}
+              description={problem?.description}
+              requirements={problem?.requirements ?? []}
+              constraints={problem?.constraints ?? []}
+            />
+            {/* Drag handle: hover/active feedback via a thin highlight, wide
+                invisible hit-area so it's easy to grab */}
+            <div
+              onMouseDown={leftPanel.onMouseDown}
+              className="absolute top-0 right-0 h-full w-1.5 -mr-0.5 cursor-col-resize z-10 group"
+            >
+              <div className="w-px h-full bg-transparent group-hover:bg-gray-600 transition-colors mx-auto" />
+            </div>
+          </div>
 
-        <RequirementsPanel
-          title={problem?.title ?? "Untitled Problem"}
-          requirements={problem?.requirements ?? []}
-          constraints={problem?.constraints ?? []}
-        />
+          <div className="flex-1 flex flex-col min-w-0">
+            <div className="relative flex-1 min-h-0">
+              <Canvas
+                nodes={canvas.nodes}
+                edges={canvas.edges}
+                onNodesChange={canvas.onNodesChange}
+                onEdgesChange={canvas.onEdgesChange}
+                onConnect={canvas.onConnect}
+              />
+              <NodePalette onAddNode={canvas.addNode} />
+              <AiMentorButton />
+            </div>
+
+            <ReviewPanel
+              isOpen={isReviewPanelOpen}
+              onToggle={setIsReviewPanelOpen}
+              review={review}
+              isReviewLoading={isReviewLoading}
+              reviewError={reviewError}
+              versions={versions}
+              height={reviewPanel.size}
+              onResizeStart={reviewPanel.onMouseDown}
+            />
+          </div>
+        </div>
       </div>
     </ReactFlowProvider>
   );

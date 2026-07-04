@@ -1,4 +1,3 @@
-
 const buildReviewPromptV1=({problem,version})=>{
     const prompt = `You are a world-class distributed systems architect with 20+ years of experience designing large-scale systems at Google, Meta, Amazon, Netflix, Uber, and Stripe.
 
@@ -197,8 +196,8 @@ Return exactly this shape:
 
 {
   "score": <integer>,
-  "verdict": "<pass|borderline|fail>",
-  "interviewRating": "<strong hire|hire|borderline|no hire>",
+  "verdict": "<one of: pass | borderline | fail>",
+  "interviewRating": "<one of: strong hire | hire | borderline | no hire>",
   "summary": "<string>",
   "scaleAssessment": "<string>",
   "requirementCoverage": {
@@ -227,22 +226,32 @@ Return exactly this shape:
   "componentFeedback": [
     {
       "component": "",
-      "assessment": "good",
+      "assessment": "<MUST be exactly one of these four strings: good | acceptable | flawed | missing — do not use any other word, e.g. never 'poor', 'bad', 'excellent'>",
       "feedback": ""
     }
   ],
   "improvements": [
     {
-      "priority": "critical",
+      "priority": "<one of: critical | high | medium | low>",
       "area": "",
       "suggestion": ""
     }
   ],
-  "conceptualDepth": "<surface|adequate|deep|exceptional>",
-  "tradeoffAwareness": "<none|minimal|moderate|strong>",
-  "productionReadiness": "<not addressed|partially addressed|well addressed>",
+  "conceptualDepth": "<one of: surface | adequate | deep | exceptional>",
+  "tradeoffAwareness": "<one of: none | minimal | moderate | strong>",
+  "productionReadiness": "<one of: not addressed | partially addressed | well addressed>",
   "followUpQuestions": []
-}`;
+}
+
+------------------------------------------------------------------
+ENUM DISCIPLINE
+------------------------------------------------------------------
+
+Every field marked "one of" above has a fixed, closed set of allowed
+values. You MUST use one of the exact listed strings, with exact spelling
+and casing, for every occurrence — including every item inside
+componentFeedback, not just the first. Using any value outside the listed
+set will cause the response to be rejected.`;
 return prompt
 }
 

@@ -5,6 +5,7 @@ import { Design } from "../models/design.model.js";
 import { Problem } from "../models/problems.model.js";
 import buildReviewPromptV1 from "../utils/aiReviewPrompt.js";
 import { generateAiReview } from "../utils/aiReviewGenerator.js";
+import { normalizeAiReview } from "../utils/normalizeAiReview.js";
 
 const generateReview = async ({ versionId, userId }) => {
   const version = await Version.findById(versionId);
@@ -22,9 +23,9 @@ const generateReview = async ({ versionId, userId }) => {
 
   const problem = await Problem.findById(version.problemId);
   // ai call on the version and populate the reivew
-  const prompt =buildReviewPromptV1({problem, version})
-  const aiResponse = await generateAiReview(prompt);
-  console.log(aiResponse);
+  const prompt = buildReviewPromptV1({ problem, version });
+  const rawAiResponse = await generateAiReview(prompt);
+  const aiResponse = normalizeAiReview(rawAiResponse);
   
   const review = await AiReview.create({
     versionId: version._id,
