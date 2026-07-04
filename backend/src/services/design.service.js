@@ -6,6 +6,43 @@ import { createSnapshot } from "./version.service.js";
 import { AiReview } from "../models/ai_reviews.model.js";
 import { DesignComment } from "../models/design_comments.model.js";
 import { DesignVote } from "../models/design_votes.model.js";
+
+const getOrCreateDesign = async ({ problemId, userId }) => {
+  console.log("📋 getOrCreateDesign called with problemId:", problemId);
+  const problem = await Problem.findById(problemId);
+  console.log("🔍 Problem found:", problem ? "YES" : "NO");
+  if (!problem) {
+    console.error("❌ Problem not found in DB for ID:", problemId);
+    throw new ApiError(404, "Problem not found");
+  }
+
+  const existingDesign = await Design.findOne({
+    ownerId: userId,
+    problemId,
+  })
+    .populate("currentVersion")
+    .populate("problemId");
+
+  if (existingDesign) {
+    return { design: existingDesign, created: false };
+  }
+
+  const createdDesign = await Design.create({
+    title: "Untitled Design",
+    ownerId: userId,
+    draftDiagramData: {},
+    draftNotes: "",
+    problemId,
+    currentVersion: null,
+    postedVersion: null,
+  });
+
+  // re-fetch populated so the response shape matches the "existing" branch
+  // (frontend needs problem.title/description/requirements/constraints either way)
+  const design = await Design.findById(createdDesign._id).populate("problemId");
+
+  return { design, created: true };
+};
 const createDesign = async ({ problemId, userId, diagramData, notes }) => {
   const problem = await Problem.findById(problemId);
   const draftDiagramData = diagramData;
@@ -120,4 +157,5 @@ export {
   getMyDesigns,
   updateDesign,
   deleteDesign,
+  getOrCreateDesign,
 };
