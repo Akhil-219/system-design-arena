@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { createSnapshot, getAllVersions, getVersionById } from "../services/version.service.js";
+import { createSnapshot, getAllVersions, getVersionById , deleteVersion} from "../services/version.service.js";
 const createSnapshotController = asyncHandler(async (req, res) => {
   const { designId } = req.params;
 
@@ -31,4 +31,11 @@ const getVersionByIdController=asyncHandler(async(req,res)=>{
   return res.status(200).json(new ApiResponse(200, {version}, "Version fetched successfully"))
 })
 
-export{createSnapshotController, getAllVersionsController, getVersionByIdController}
+const deleteVersionController = asyncHandler(async (req, res) => {
+  const { versionId } = req.params;
+  await deleteVersion({ versionId, userId: req.user._id });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Version deleted successfully"));
+});
+export{createSnapshotController, getAllVersionsController, getVersionByIdController, deleteVersionController}

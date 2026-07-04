@@ -4,7 +4,7 @@ import cors from "cors"
 import authRouter from "../src/routes/auth.routes.js"
 import problemsRouter from "../src/routes/problem.routes.js"
 import designRouter from "../src/routes/design.routes.js"
-import communityDesignRouter from "../src/routes/communityDesign.routes.js"
+import communityRouter from "../src/routes/community.routes.js"
 import userRouter from "../src/routes/user.routes.js"
 import dashboardRouter from "../src/routes/dashboard.routes.js"
 const app =express()
@@ -23,7 +23,7 @@ app.use(cookieParser())
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/problems", problemsRouter)
 app.use("/api/v1/designs", designRouter)
-app.use("/api/v1/community",communityDesignRouter)
+app.use("/api/v1/community",communityRouter)
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/dashboard",dashboardRouter)
 export {app}

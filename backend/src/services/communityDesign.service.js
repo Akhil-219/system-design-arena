@@ -6,26 +6,25 @@ const publishDesign = async ({ versionId, userId }) => {
   // get the version , and user , check the are valid or not ,
   // get the design of the version, if there set the ispublished to ture if nto there
   // else change the publishedVers
-  const version = await Version.findById({_id:versionId});
+  const version = await Version.findById(versionId);
   if (!version) {
     throw new ApiError(404, "Version not found");
   }
-    if (version.createdBy.toString() !== userId.toString()) {
+  if (version.createdBy.toString() !== userId.toString()) {
     throw new ApiError(403, "Unauthorised Access");
   }
   const design = await Design.findById(version.designId);
   if (!design) {
     throw new ApiError(404, "Design not found");
   }
-
+ 
   design.isPosted = true;
   design.status = "PUBLISHED";
   design.postedVersion = version._id;
-
+ 
   await design.save({ validateBeforeSave: false });
   return { version };
 };
-
 const getCommunityDesigns = async ({ problemId }) => {
   const query = {
     isPosted: true,

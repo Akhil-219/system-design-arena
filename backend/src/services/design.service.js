@@ -124,30 +124,25 @@ const deleteDesign = async ({ designId, userId }) => {
   if (design.ownerId.toString() !== userId.toString()) {
     throw new ApiError(403, "Access denied");
   }
-  const versionIds = await Version.find(
-  { designId: design._id },
-  "_id"
-);
-
-await AiReview.deleteMany({
-  versionId: {
-    $in: versionIds.map(v => v._id)
-  }
-});
-
-await Version.deleteMany({
-    designId: design._id
-});
-
-await DesignComment.deleteMany({
-    designId: design._id
-});
-
-await DesignVote.deleteMany({
-    designId: design._id
-});
-
-await Design.findByIdAndDelete(design._id);
+ 
+  const versionIds = await Version.find({ designId: design._id }, "_id");
+  const commentIds = await DesignComment.find({ designId: design._id }, "_id");
+ 
+  await AiReview.deleteMany({
+    versionId: { $in: versionIds.map((v) => v._id) },
+  });
+ 
+  // NEW: clean up votes on this design's comments before the comments
+  // themselves are gone, otherwise these become orphaned.
+  await DesignCommentVote.deleteMany({
+    commentId: { $in: commentIds.map((c) => c._id) },
+  });
+ 
+  await Version.deleteMany({ designId: design._id });
+  await DesignComment.deleteMany({ designId: design._id });
+  await DesignVote.deleteMany({ designId: design._id });
+ 
+  await Design.findByIdAndDelete(design._id);
   return true;
 };
 

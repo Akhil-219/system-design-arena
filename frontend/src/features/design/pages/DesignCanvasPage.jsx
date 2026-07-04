@@ -16,6 +16,7 @@ import {
 } from "../services/designService";
 import { generateReview } from "../../review/services/aiReviewService";
 import { getAllVersions } from "../services/versionService";
+import { publishDesign } from "../../community/services/communityService";
 
 function DesignCanvasPage() {
   const { problemId } = useParams();
@@ -70,6 +71,7 @@ function DesignCanvasContent({ design, problemId }) {
   const canvas = useCanvas(design?.draftDiagramData);
   const [notes, setNotes] = useState(design?.draftNotes ?? "");
   const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | no-changes | error
+  const [publishState, setPublishState] = useState("idle"); // idle | publishing | published | error
 
   const [isReviewPanelOpen, setIsReviewPanelOpen] = useState(false);
   const [review, setReview] = useState(null);
@@ -136,11 +138,31 @@ function DesignCanvasContent({ design, problemId }) {
     }
   };
 
-  const handlePublish = () => {
-    // TODO: wire up to the community-designs publish endpoint once it
-    // exists. Publishing is a deliberate, separate action from saving —
-    // saving a version should never make a design visible to others.
-    console.log("Publish coming soon");
+  const handlePublish = async () => {
+    if (!design?._id) return;
+
+    // Publishing needs a saved version to point at — use the most recent
+    // one from what we already have loaded.
+    const latestVersion = versions.reduce(
+      (latest, v) => (!latest || v.versionNumber > latest.versionNumber ? v : latest),
+      null
+    );
+
+    if (!latestVersion) {
+      setPublishState("error");
+      setTimeout(() => setPublishState("idle"), 2500);
+      return;
+    }
+
+    setPublishState("publishing");
+    try {
+      await publishDesign(design._id, latestVersion._id);
+      setPublishState("published");
+    } catch {
+      setPublishState("error");
+    } finally {
+      setTimeout(() => setPublishState("idle"), 2000);
+    }
   };
 
   const problem = design?.problemId; // populated Problem doc
@@ -164,9 +186,13 @@ function DesignCanvasContent({ design, problemId }) {
           <div className="flex items-center gap-2">
             <button
               onClick={handlePublish}
-              className="font-mono text-xs uppercase tracking-wider text-gray-300 border border-gray-800 rounded-md px-4 py-2 hover:bg-[#1a1a1a] hover:text-white transition-colors"
+              disabled={publishState === "publishing"}
+              className="font-mono text-xs uppercase tracking-wider text-gray-300 border border-gray-800 rounded-md px-4 py-2 hover:bg-[#1a1a1a] hover:text-white transition-colors disabled:opacity-50"
             >
-              Publish
+              {publishState === "publishing" && "Publishing…"}
+              {publishState === "published" && "Published ✓"}
+              {publishState === "error" && "Publish failed"}
+              {publishState === "idle" && "Publish"}
             </button>
             <button
               onClick={handleSave}

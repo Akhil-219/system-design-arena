@@ -28,3 +28,6 @@ export const createVersionSnapshot = async (designId) => {
   const response = await axiosInstance.post(`/designs/${designId}/versions/snapshot`);
   return response.data.data.version;
 };
+export const deleteDesign = async (designId) => {
+  await axiosInstance.delete(`/designs/${designId}`);
+};
