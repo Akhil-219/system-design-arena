@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { getProblemCommunityDesigns } from "../../community/services/communityService";
+import CommunityDesignRow from "../../community/components/CommunityDesignRow";
 
 const TABS = ["Description", "Requirements", "Constraints", "Notes", "Community"];
 
@@ -16,6 +17,33 @@ function LeftPanel({
   onNotesChange,
 }) {
   const [activeTab, setActiveTab] = useState("Description");
+
+  const [communityDesigns, setCommunityDesigns] = useState([]);
+  const [isCommunityLoading, setIsCommunityLoading] = useState(false);
+  const [communityError, setCommunityError] = useState(null);
+  const [hasFetchedCommunity, setHasFetchedCommunity] = useState(false);
+
+  useEffect(() => {
+    if (activeTab !== "Community" || hasFetchedCommunity) return;
+
+    const fetchCommunityDesigns = async () => {
+      setIsCommunityLoading(true);
+      setCommunityError(null);
+      try {
+        const designs = await getProblemCommunityDesigns(problemId);
+        setCommunityDesigns(designs);
+      } catch (err) {
+        setCommunityError(
+          err?.response?.data?.message || "Couldn't load community designs."
+        );
+      } finally {
+        setIsCommunityLoading(false);
+        setHasFetchedCommunity(true);
+      }
+    };
+
+    fetchCommunityDesigns();
+  }, [activeTab, hasFetchedCommunity, problemId]);
 
   return (
     <div className="h-full w-full flex flex-col bg-[#0a0a0a] border-r border-gray-800">
@@ -105,19 +133,35 @@ function LeftPanel({
         )}
 
         {activeTab === "Community" && (
-          <div className="flex flex-col items-start gap-4">
-            <p className="text-sm text-gray-400 leading-relaxed">
+          <div>
+            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
               See how other users approached this problem, and leave feedback
               on their designs.
             </p>
-            {/* TODO: replace with real route once the community-designs
-                listing page is built */}
-            <Link
-              to={`/problems/${problemId}/community`}
-              className="font-mono text-xs uppercase tracking-wider text-black bg-white rounded-md px-4 py-2 hover:bg-gray-200 transition-colors"
-            >
-              Browse Community Designs
-            </Link>
+
+            {isCommunityLoading && (
+              <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+                Loading designs…
+              </p>
+            )}
+
+            {!isCommunityLoading && communityError && (
+              <p className="text-sm text-red-400">{communityError}</p>
+            )}
+
+            {!isCommunityLoading && !communityError && communityDesigns.length === 0 && (
+              <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+                No one has published a design for this problem yet.
+              </p>
+            )}
+
+            {!isCommunityLoading && !communityError && communityDesigns.length > 0 && (
+              <div>
+                {communityDesigns.map((design) => (
+                  <CommunityDesignRow key={design._id} design={design} />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
