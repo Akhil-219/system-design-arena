@@ -43,9 +43,18 @@ function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <span className="text-sm text-gray-400">
+              <NavLink
+                to="/profile"
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
                 {user.name || user.username || "Account"}
-              </span>
+              </NavLink>
+              <NavLink
+                to="/settings"
+                className="text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                Settings
+              </NavLink>
               <button
                 onClick={handleLogout}
                 className="px-4 py-1.5 border border-gray-700 rounded-md text-sm hover:border-gray-500 transition-colors"

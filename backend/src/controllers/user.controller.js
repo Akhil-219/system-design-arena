@@ -28,8 +28,8 @@ const updateAvatarController=asyncHandler(async(req,res)=>{
     if (!profilePictureURL) {
         throw new ApiError(400, "there was no valid path  of the avatar");
     }
-    await updateAvatar({profilePictureURL:profilePictureURL, userId:req.user._id})
-    return res.status(200).json(new ApiResponse(200,{}, "Avatar updated successfully"))
+    const {user}=await updateAvatar({profilePictureURL:profilePictureURL, userId:req.user._id})
+    return res.status(200).json(new ApiResponse(200,{user}, "Avatar updated successfully"))
 })
 
 const getUserProfileByUsernameController =asyncHandler(async(req, res)=>{

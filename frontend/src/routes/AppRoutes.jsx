@@ -12,6 +12,8 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import ProblemDetailsPage from "../features/problems/pages/ProblemDetailsPage";
 import DesignCanvasPage from "../features/design/pages/DesignCanvasPage";
 import ProblemCommunityPage from "../features/community/pages/ProblemCommunityPage";
+import ProfilePage from "../features/profile/pages/ProfilePage";
+import SettingsPage from "../features/profile/pages/SettingsPage";
 function AppRoutes() {
   return (
     <Routes>
@@ -44,6 +46,8 @@ function AppRoutes() {
         path="/problems/:problemId/community"
         element={<ProblemCommunityPage />}
       />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );
 }

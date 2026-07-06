@@ -23,33 +23,15 @@ export const getProblemCommunityDesigns = async (problemId) => {
 // Fetches a single published design. Works from either context since both
 // mounts expose /:designId — pass problemId when you have it (keeps the
 // URL scoped/consistent), omit it to hit the general path.
-const getCommunityDesigns = async ({ problemId }) => {
-  const query = {
-    isPosted: true,
-  };
-  if (problemId) {
-    query.problemId = problemId;
-  }
-  const designs = await Design.find(query)
-    .populate("ownerId", "username profilePicture")
-    .populate("problemId", "title difficulty slug tags"); // was: "title difficulty"
-  return { designs };
+export const getCommunityDesigns = async () => {
+  const response = await axiosInstance.get(`/community`);
+  return response.data.data.designs;
 };
  
-const getCommunityDesignById = async ({ problemId, designId }) => {
-  const query = {
-    isPosted: true,
-    _id: designId,
-  };
-  if (problemId) {
-    query.problemId = problemId;
-  }
-  const design = await Design.findOne(query)
-    .populate("ownerId")
-    .populate("problemId") // already unrestricted here, includes slug/tags
-    .populate("postedVersion");
-  if (!design) {
-    throw new ApiError(404, "Design not found");
-  }
-  return { design };
+export const getCommunityDesignById = async (designId, problemId) => {
+  const url = problemId
+    ? `/problems/${problemId}/community/${designId}`
+    : `/community/${designId}`;
+  const response = await axiosInstance.get(url);
+  return response.data.data.design;
 };
