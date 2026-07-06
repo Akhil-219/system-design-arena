@@ -30,6 +30,22 @@ function AppRoutes() {
             </ProtectedRoutes>
           }
         />
+        <Route
+        path="/profile"
+        element={
+          <ProtectedRoutes>
+            <ProfilePage />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoutes>
+            <SettingsPage />
+          </ProtectedRoutes>
+        }
+      />
       </Route>
       <Route path="/problems/:slug" element={<ProblemDetailsPage />} />
       <Route path="/login" element={<Login />} />
@@ -46,8 +62,6 @@ function AppRoutes() {
         path="/problems/:problemId/community"
         element={<ProblemCommunityPage />}
       />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );
 }
