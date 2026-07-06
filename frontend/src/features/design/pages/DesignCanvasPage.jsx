@@ -241,7 +241,7 @@ function DesignCanvasContent({ design, problemId }) {
                 onNodeLabelChange={canvas.updateNodeLabel}
               />
               <NodePalette onAddNode={canvas.addNode} />
-              <AiMentorButton />
+              <AiMentorButton problemId={problemId} />
             </div>
 
             <ReviewPanel
