@@ -2,18 +2,31 @@ import { loginUser, registerUser , refreshAccessToken, logoutUser, getCurrentUse
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
+
+const isProd = process.env.NODE_ENV === "production";
+const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+};
+
+const accessTokenCookieOptions = {
+    ...cookieOptions,
+    maxAge: Number(process.env.ACCESS_TOKEN_EXPIRY),
+};
+
+const refreshTokenCookieOptions = {
+    ...cookieOptions,
+    maxAge: Number(process.env.REFRESH_TOKEN_EXPIRY),
+};
+
 const registerUserController=asyncHandler(async(req,res)=>{
     const {username, email,password}= req.body
     const {user, accessToken, refreshToken}=await registerUser({username,email,password})
-    const options={
-        httpOnly:true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite:lax,
-    }
     return res
     .status(201)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         201,
         { user }, // make sure to remove the tokens this after the frontend development 
@@ -27,15 +40,11 @@ const getCurrentUserController=asyncHandler(async(req,res)=>{
 const loginUserController=asyncHandler(async (req, res)=>{
     const {login, password} =req.body
     const {user, accessToken, refreshToken}= await loginUser({login,password})
-    const options={
-        httpOnly:true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite:"lax",
-    }
+
     return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         200,
         { user }, // make sure to remove this after the frontend development 
@@ -46,15 +55,11 @@ const loginUserController=asyncHandler(async (req, res)=>{
 const refreshAccessTokenController =asyncHandler(async(req, res)=>{
     const incomingRefreshToken=req.cookies.refreshToken;
     const {accessToken, refreshToken}=await refreshAccessToken(incomingRefreshToken)
-    const options={
-        httpOnly:true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite:lax,
-    }
+
     return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         200,
         { }, // remove this also (*dont forget*)
@@ -68,15 +73,11 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     if(!isloggedOut){
         throw new ApiError(500," Something went wrong while logging out")
     }
-    const options = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite:lax,
-  };
+
   return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "logged out successfully "));
 })
 
