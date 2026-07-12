@@ -24,22 +24,31 @@ function loadGoogleScript() {
   });
 }
 
+
 function GoogleSignInButton({ onCredential }) {
   const containerRef = useRef(null);
+  const hasInitialized = useRef(false);
+
+  const onCredentialRef = useRef(onCredential);
+  useEffect(() => {
+    onCredentialRef.current = onCredential;
+  }, [onCredential]);
 
   useEffect(() => {
+    if (hasInitialized.current) return;
     let cancelled = false;
 
     loadGoogleScript().then(() => {
-      if (cancelled || !containerRef.current) return;
+      if (cancelled || !containerRef.current || hasInitialized.current) return;
+      hasInitialized.current = true;
 
       window.google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: (response) => onCredential(response.credential),
+        callback: (response) => onCredentialRef.current(response.credential),
       });
 
       window.google.accounts.id.renderButton(containerRef.current, {
-        theme: "filled_black",
+        theme: "outline",
         size: "large",
         shape: "rectangular",
         width: 320,
@@ -49,7 +58,7 @@ function GoogleSignInButton({ onCredential }) {
     return () => {
       cancelled = true;
     };
-  }, [onCredential]);
+  }, []);
 
   return <div ref={containerRef} className="flex justify-center" />;
 }
