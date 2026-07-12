@@ -10,7 +10,7 @@ build/
 # matters most right now: your VITE_GOOGLE_CLIENT_ID lives in .env, and
 # while that specific value isn't secret, .env is exactly where you'd
 # accidentally also commit something that IS secret later (API keys,
-# tokens, etc.) if this weren't ignored from the start.
+# tokens, ant others) if this weren't ignored from the start.
 .env
 .env.local
 .env.*.local
