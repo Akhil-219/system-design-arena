@@ -10,6 +10,11 @@ export const registerUser = async (data) => {
     return response.data.data.user;
 };
 
+export const googleLogin = async (idToken) => {
+    const response = await api.post("/auth/google", { idToken });
+    return response.data.data.user;
+};
+
 export const getCurrentUser = async () => {
     const response = await api.get("/users/me");
     return response.data.data.user;

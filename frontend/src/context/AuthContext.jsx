@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, createContext, useContext, useEffect } from "react";
-import {loginUser,registerUser,logoutUser,getCurrentUser} from "../api/auth.api";
+import {loginUser,registerUser,logoutUser,getCurrentUser ,googleLogin as googleLoginApi} from "../api/auth.api";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -9,6 +9,12 @@ export const AuthProvider = ({ children }) => {
   
   const login = async (data) => {
     const user = await loginUser(data);
+    setUser(user);
+    return user;
+  };
+
+    const googleLogin = async (idToken) => {
+    const user = await googleLoginApi(idToken);
     setUser(user);
     return user;
   };
@@ -36,15 +42,29 @@ export const AuthProvider = ({ children }) => {
     }
     restoreSession();
   }, []);
-  const updateUser = (updatedFields) => {
+   const updateUser = (updatedFields) => {
     setUser((prev) => (prev ? { ...prev, ...updatedFields } : prev));
   };
+ 
+    useEffect(() => {
+    const restoreSession =async()=>{
+      try {
+        const user  = await getCurrentUser()
+        setUser(user)
+      } catch (error) {
+        setUser(null)
+      }
+      setLoading(false)
+    }
+    restoreSession();
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         login,
+        googleLogin,
         register,
         logout,
         loading,
