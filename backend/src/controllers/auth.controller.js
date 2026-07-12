@@ -47,7 +47,7 @@ const loginUserController=asyncHandler(async (req, res)=>{
     .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         200,
-        { }, // make sure to remove this after the frontend development 
+        { user}, // make sure to remove this after the frontend development 
         "User loggedIn successfully" 
     ))
 })
@@ -70,15 +70,10 @@ const refreshAccessTokenController =asyncHandler(async(req, res)=>{
 const googleAuthController = asyncHandler(async (req, res) => {
     const { idToken } = req.body
     const { user, accessToken, refreshToken } = await loginWithGoogle({ idToken })
-    const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-    }
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, accessTokenCookieOptions)
+        .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
         .json(new ApiResponse(
             200,
             { user },

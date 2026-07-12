@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 
 function Register() {
-  const { register } = useAuth();
+  const { register, googleLogin} = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState("");

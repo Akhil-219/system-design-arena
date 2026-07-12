@@ -24,31 +24,27 @@ function loadGoogleScript() {
   });
 }
 
-
 function GoogleSignInButton({ onCredential }) {
   const containerRef = useRef(null);
-  const hasInitialized = useRef(false);
-
   const onCredentialRef = useRef(onCredential);
-  useEffect(() => {
-    onCredentialRef.current = onCredential;
-  }, [onCredential]);
+
+  // Always keep the latest handler without needing it in the effect's deps
+  onCredentialRef.current = onCredential;
 
   useEffect(() => {
-    if (hasInitialized.current) return;
     let cancelled = false;
 
     loadGoogleScript().then(() => {
-      if (cancelled || !containerRef.current || hasInitialized.current) return;
-      hasInitialized.current = true;
+      if (cancelled || !containerRef.current) return;
 
       window.google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         callback: (response) => onCredentialRef.current(response.credential),
       });
 
+      containerRef.current.innerHTML = ""; // clear before rendering, avoids duplicate buttons
       window.google.accounts.id.renderButton(containerRef.current, {
-        theme: "outline",
+        theme: "filled_black",
         size: "large",
         shape: "rectangular",
         width: 320,
@@ -58,7 +54,7 @@ function GoogleSignInButton({ onCredential }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, []); // runs once per mount — no dependency on onCredential
 
   return <div ref={containerRef} className="flex justify-center" />;
 }
