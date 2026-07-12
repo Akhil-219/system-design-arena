@@ -1,4 +1,4 @@
-import { loginUser, registerUser , refreshAccessToken, logoutUser, getCurrentUser } from "../services/auth.service.js"
+import { loginUser, registerUser , refreshAccessToken, logoutUser, getCurrentUser,loginWithGoogle } from "../services/auth.service.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {ApiError} from "../utils/ApiError.js"
