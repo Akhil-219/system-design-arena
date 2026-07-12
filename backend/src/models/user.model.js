@@ -24,11 +24,13 @@ const userSchema =  new Schema({
       type:Boolean,
       default:true,
     },
-    password:{
-        type:String,
-        required:[true, "Password is needed"],
-        minlength:8,
-        select:false,
+    password: {
+      type: String,
+      required: function () {
+        return !this.googleId;
+      },
+      minlength: 8,
+      select: false,
     },
     bio:{
         type:String,
@@ -53,6 +55,16 @@ const userSchema =  new Schema({
     refreshToken:{
         type:String,
         select:false
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // allows many docs with no googleId, since not everyone signs in with Google
+    },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
     },
 
 },{timestamps:true})

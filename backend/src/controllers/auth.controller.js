@@ -29,7 +29,7 @@ const registerUserController=asyncHandler(async(req,res)=>{
     .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         201,
-        { user }, // make sure to remove the tokens this after the frontend development 
+        {  }, // make sure to remove the tokens this after the frontend development 
         "User registered successfully" 
     ))
 })
@@ -47,7 +47,7 @@ const loginUserController=asyncHandler(async (req, res)=>{
     .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(new ApiResponse(
         200,
-        { user }, // make sure to remove this after the frontend development 
+        { }, // make sure to remove this after the frontend development 
         "User loggedIn successfully" 
     ))
 })
@@ -67,6 +67,25 @@ const refreshAccessTokenController =asyncHandler(async(req, res)=>{
     ))  
 })
 
+const googleAuthController = asyncHandler(async (req, res) => {
+    const { idToken } = req.body
+    const { user, accessToken, refreshToken } = await loginWithGoogle({ idToken })
+    const options = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    }
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(
+            200,
+            { user },
+            "Logged in with Google successfully"
+        ))
+})
+
 const logoutUserController = asyncHandler(async(req,res)=>{
     const userId=req.user._id;// after middleware setup
     const isloggedOut=await logoutUser(userId)
@@ -81,4 +100,4 @@ const logoutUserController = asyncHandler(async(req,res)=>{
     .json(new ApiResponse(200, {}, "logged out successfully "));
 })
 
-export {loginUserController, logoutUserController, refreshAccessTokenController, registerUserController,getCurrentUserController}
+export {loginUserController, logoutUserController, refreshAccessTokenController, registerUserController,getCurrentUserController, googleAuthController}

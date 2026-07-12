@@ -1,6 +1,86 @@
 import { User } from "../models/user.model.js";
 import {ApiError} from "../utils/ApiError.js"
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const generateUniqueUsernameFromGoogle = async (email, name) => {
+  const base =
+    (name || email.split("@")[0])
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[^a-z0-9_]/g, "")
+      .slice(0, 20) || "user";
+ 
+  const padded = base.length >= 3 ? base : base.padEnd(3, "0");
+ 
+  let candidate = padded;
+  let suffix = 0;
+  while (await User.findOne({ username: candidate })) {
+    suffix += 1;
+    candidate = `${padded}${suffix}`;
+  }
+  return candidate;
+};
+
+
+const loginWithGoogle = async ({ idToken }) => {
+  if (!idToken) {
+    throw new ApiError(400, "Google ID token is required");
+  }
+ 
+  let payload;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch (error) {
+    throw new ApiError(401, "Invalid Google token");
+  }
+ 
+  const { sub: googleId, email, name, picture } = payload;
+  if (!email) {
+    throw new ApiError(400, "Google account has no email");
+  }
+ 
+  let user = await User.findOne({ googleId });
+ 
+  if (!user) {
+    // No account linked to this Google identity yet. Check whether an
+    // existing email/password account already uses this email, and link
+    // Google sign-in to it instead of creating a duplicate account.
+    user = await User.findOne({ email: email.toLowerCase() });
+ 
+    if (user) {
+      user.googleId = googleId;
+      if (!user.profilePicture && picture) {
+        user.profilePicture = picture;
+      }
+      await user.save({ validateBeforeSave: false });
+    } else {
+      const username = await generateUniqueUsernameFromGoogle(email, name);
+      user = await User.create({
+        username,
+        email: email.toLowerCase(),
+        googleId,
+        profilePicture: picture || "",
+        authProvider: "google",
+      });
+    }
+  }
+ 
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+  const loggedInUser = await User.findById(user._id);
+ 
+  return {
+    user: loggedInUser,
+    accessToken,
+    refreshToken,
+  };
+};
 
 const generateAccessAndRefreshTokens = async (userId) => {
     const user = await User.findById(userId);
@@ -128,4 +208,4 @@ const logoutUser=async (userId)=>{
     return true
 }
 
-export {registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser}
+export {registerUser, loginUser, refreshAccessToken, logoutUser,getCurrentUser, loginWithGoogle}
