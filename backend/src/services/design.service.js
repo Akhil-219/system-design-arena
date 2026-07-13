@@ -7,12 +7,9 @@ import { AiReview } from "../models/ai_reviews.model.js";
 import { DesignComment } from "../models/design_comments.model.js";
 import { DesignVote } from "../models/design_votes.model.js";
 
-const getOrCreateDesign = async ({ problemId, userId }) => {
-  console.log("📋 getOrCreateDesign called with problemId:", problemId);
+const getOrCreateDesign = async ({ problemId, userId }) => {  
   const problem = await Problem.findById(problemId);
-  console.log("🔍 Problem found:", problem ? "YES" : "NO");
   if (!problem) {
-    console.error("❌ Problem not found in DB for ID:", problemId);
     throw new ApiError(404, "Problem not found");
   }
 
@@ -43,34 +40,7 @@ const getOrCreateDesign = async ({ problemId, userId }) => {
 
   return { design, created: true };
 };
-const createDesign = async ({ problemId, userId, diagramData, notes }) => {
-  const problem = await Problem.findById(problemId);
-  const draftDiagramData = diagramData;
-  const draftNotes = notes;
-  if (!problem) {
-    throw new ApiError(404, "Problem not found");
-  }
-  const existingDesgin = await Design.findOne({
-    ownerId: userId,
-    problemId,
-  });
-  if (existingDesgin) {
-    throw new ApiError(409, "Design already exists");
-  }
-  const design = await Design.create({
-    title: "Untitled Design",
-    ownerId: userId,
-    draftDiagramData: draftDiagramData,
-    draftNotes: draftNotes,
-    problemId,
-    currentVersion: null,
-  });
-  design.currentVersion = null;
-  design.postedVersion = null;
-  await design.save();
-  // await createSnapshot({ designId,userId})
-  return { design };
-};
+
 
 const getDesignById = async ({ designId, userId }) => {
   //check for designid, if not sound return 404,
@@ -147,7 +117,6 @@ const deleteDesign = async ({ designId, userId }) => {
 };
 
 export {
-  createDesign,
   getDesignById,
   getMyDesigns,
   updateDesign,
