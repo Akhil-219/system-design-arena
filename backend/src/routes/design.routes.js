@@ -15,6 +15,6 @@ router.route("/:designId").patch(verifyJWT,updateDesignController)
 router.route("/:designId").delete(verifyJWT, deleteDesignController) 
 
 router.use("/:designId/versions", versionRouter);
-console.log("design.routes.js loaded. Registered paths:", router.stack.map(r => r.route?.path));
+
 
 export default router
