@@ -5,7 +5,6 @@ A LeetCode-style platform to practice system design. Draw architecture diagrams 
 ## Live Demo
 
 - App: https://system-design-arena-eight.vercel.app/
-- API: https://system-design-arena.onrender.com/api/v1
 
 ## Features
 
