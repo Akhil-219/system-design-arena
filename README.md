@@ -4,8 +4,8 @@ A LeetCode-style platform to practice system design. Draw architecture diagrams 
 
 ## Live Demo
 
-- App: [\[add your live link here\]](https://system-design-arena-eight.vercel.app/)
-- API: [\[add your backend link here\]](https://system-design-arena.onrender.com/api/v1)
+- App: https://system-design-arena-eight.vercel.app/
+- API: https://system-design-arena.onrender.com/api/v1
 
 ## Features
 
@@ -37,31 +37,26 @@ A LeetCode-style platform to practice system design. Draw architecture diagrams 
 
 1. Clone the repo
 
-   ```bash
-   git clone https://github.com/your-username/system-design-arena.git
-   cd system-design-arena
-   ```
+```bash
+git clone https://github.com/your-username/system-design-arena.git
+cd system-design-arena
+```
 
 2. Install dependencies
 
-   ```bash
-
-   ```
-
+```bash
 cd frontend
 npm install
 
 cd ../backend
 npm install
-
 ```
 
 3. Add environment variables
 
 Create a `.env` file in `backend/` with:
 
-```
-
+```env
 MONGODB_URI=
 CORS_ORIGIN=
 ACCESS_TOKEN_SECRET=
@@ -71,29 +66,27 @@ REFRESH_TOKEN_EXPIRY=
 OPENROUTER_API_KEY=
 OPENROUTER_MODEL=
 
-```
-
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET =
+CLOUDINARY_API_SECRET=
 
 GOOGLE_CLIENT_ID=
-
 ```
 
-    Create a `.env` file in `frontend/` with:
+Create a `.env` file in `frontend/` with:
 
-    ```
-    VITE_API_URL=
-    VITE_GOOGLE_CLIENT_ID=
+```env
+VITE_API_URL=
+VITE_GOOGLE_CLIENT_ID=
+```
 
 4. Run the app
 
 ```bash
-# In server/
+# In backend/
 npm run dev
 
-# In client/
+# In frontend/
 npm run dev
 ```
 
